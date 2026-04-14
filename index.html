@@ -609,8 +609,7 @@ let ggResultCache={},angleChartInst=null,fbChartInst=null,fbChart2Inst=null;
 let activeVtags=new Set();
 let fbFavorites=JSON.parse(localStorage.getItem('callspy_favs')||'[]');
 
-const FB_API='https://graph.facebook.com/v21.0/ads_archive';
-const FB_FIELDS='id,ad_creation_time,ad_delivery_start_time,ad_delivery_stop_time,ad_creative_bodies,ad_creative_link_captions,ad_creative_link_titles,ad_snapshot_url,impressions,page_id,page_name,publisher_platforms,spend,ad_creative_images,ad_creative_videos';
+const APIFY_TOKEN='apify_api_ndYUy4zfhh1WtM8E7aMY5J9pDlMW773s4Vut';
 
 // PPC signal keywords
 const PPC_HIGH=['call now','speak to','phone number','call us','dial','reservation','speak with','call today','24/7 support','customer service number','helpline','call free','freephone','1-800','1-888','1-877','call agent','live agent'];
@@ -779,33 +778,64 @@ function detectVertical(text){
 }
 
 // ═══════════════════════════════════════════
-//  FACEBOOK FETCH
+//  FACEBOOK FETCH (via Apify)
 // ═══════════════════════════════════════════
 async function fetchFb(keyword,label,after=null){
-  if(isLoading)return;if(!FB_TOKEN){openCfg();return;}
+  if(isLoading)return;
   isLoading=true;currentKw=keyword;currentLabel=label;
   showFbLoading(keyword);
   const country=document.getElementById('fCountry').value;
   const limit=document.getElementById('ffLimit')?document.getElementById('ffLimit').value:24;
-  const params=new URLSearchParams({access_token:FB_TOKEN,ad_type:document.getElementById('ffAdType').value||'ALL',ad_reached_countries:JSON.stringify([country]),search_terms:keyword,fields:FB_FIELDS,limit:limit});
-  if(after)params.append('after',after);
   try{
-    const res=await fetch(`${FB_API}?${params}`);
+    const params=new URLSearchParams({keyword,country,limit,token:APIFY_TOKEN});
+    const res=await fetch(`/api/apify?${params}`);
     const data=await res.json();
-    if(data.error){showFbErr(data.error.message);return;}
-    // Score all ads
-    fbRawAds=(data.data||[]).map(ad=>{
+    if(data.error){showFbErr(data.error);return;}
+    // Normalize Apify data to internal format
+    fbRawAds=(data.data||[]).map((item,idx)=>{
+      const ad=normalizeApifyAd(item,idx);
       const ppc=scorePpc(ad);
       return{...ad,_ppcScore:ppc.score,_ppcLabel:ppc.label,_phones:ppc.phones,_isCallCta:ppc.isCallCta,_vertical:ppc.vertical};
     });
-    fbCursor=data.paging?.cursors?.after||null;
+    fbCursor=null; // Apify handles pagination differently
     fbFilteredAds=applyFbFilters(fbRawAds);
     updateFbStats(fbRawAds,fbFilteredAds);
     renderFbResults(fbFilteredAds);
     renderFbIntel(fbFilteredAds);
-    updateFbPag();
   }catch(e){showFbErr('Network error: '+e.message);}
   finally{isLoading=false;}
+}
+
+// Normalize Apify response to match our internal ad format
+function normalizeApifyAd(item, idx){
+  // Extract images from snapshot
+  const snapImgs=item.snapshot?.images||[];
+  const snapVids=item.snapshot?.videos||[];
+  const imgUrl=snapImgs[0]?.resizedImageUrl||snapImgs[0]?.originalImageUrl||'';
+  const vidUrl=snapVids[0]?.videoSdUrl||snapVids[0]?.videoHdUrl||'';
+  const posterUrl=snapVids[0]?.videoPreviewImageUrl||'';
+
+  return {
+    id: item.adArchiveID||item.id||('apify_'+idx),
+    page_name: item.pageName||item.page_name||'Unknown',
+    page_id: item.pageID||item.page_id||'',
+    ad_creative_bodies: [item.adCreativeBody||item.snapshot?.body?.markup?.__html||item.body||''],
+    ad_creative_link_titles: [item.adCreativeLinkTitle||item.snapshot?.title||item.title||''],
+    ad_creative_link_captions: [item.adCreativeLinkCaption||item.displayFormat||item.domain||''],
+    ad_snapshot_url: item.snapshot?.url||item.snapshotUrl||`https://www.facebook.com/ads/library/?id=${item.adArchiveID}`,
+    ad_creation_time: item.startDate||item.startedRunningDate||null,
+    ad_delivery_stop_time: item.endDate||item.stoppedRunningDate||null,
+    publisher_platforms: item.publisherPlatform||['facebook'],
+    spend: item.spend||null,
+    impressions: item.impressions||null,
+    // Creative fields
+    ad_creative_images: imgUrl?[{original_image_url:imgUrl,url:imgUrl}]:[],
+    ad_creative_videos: vidUrl?[{video_sd_url:vidUrl,video_hd_url:vidUrl,video_preview_image_url:posterUrl}]:[],
+    // Raw Apify data preserved
+    _apify: item,
+    _imgUrl: imgUrl,
+    _vidUrl: vidUrl,
+  };
 }
 
 function updateFbStats(raw,filtered){
@@ -1176,7 +1206,7 @@ function goFbPage(dir){
 function updateFbPag(){/* handled inline in renderFbResults */}
 
 function showFbLoading(kw){
-  document.getElementById('fbc-results').innerHTML=`<div class="state-wrap"><div class="spinner fb-spin"></div><div style="font-family:var(--mono);font-size:12px;color:var(--text3)">Scanning Facebook: "${kw}"...</div></div>`;
+  document.getElementById('fbc-results').innerHTML=`<div class="state-wrap"><div class="spinner fb-spin"></div><div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:4px">Fetching Facebook ads via Apify...</div><div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;opacity:.6">"${esc(kw)}" · this takes ~30 seconds</div></div>`;
 }
 function showFbErr(msg){
   isLoading=false;
@@ -1433,8 +1463,10 @@ function showGgErr(msg){isLoading=false;document.getElementById('gc-ads').innerH
 //  CONFIG & VERIFY
 // ═══════════════════════════════════════════
 function openCfg(){
-  if(activeTab==='fb'){document.getElementById('cfgFbToken').value=FB_TOKEN||'';document.getElementById('fbModal').classList.remove('hidden');}
-  else{document.getElementById('cfgGgKey').value=GG_KEY||'';document.getElementById('cfgGgLoc').value=GG_LOC||'';document.getElementById('ggModal').classList.remove('hidden');}
+  // FB tab now uses Apify — only GG config needed
+  document.getElementById('cfgGgKey').value=GG_KEY||'';
+  document.getElementById('cfgGgLoc').value=GG_LOC||'';
+  document.getElementById('ggModal').classList.remove('hidden');
 }
 function closeCfg(){document.getElementById('fbModal').classList.add('hidden');document.getElementById('ggModal').classList.add('hidden');}
 function saveFbCfg(){const t=document.getElementById('cfgFbToken').value.trim();if(t){FB_TOKEN=t;localStorage.setItem('adspy_fb_token',t);}closeCfg();verifyKey();}
@@ -1442,11 +1474,19 @@ function saveGgCfg(){const k=document.getElementById('cfgGgKey').value.trim();co
 function verifyKey(){
   const badge=document.getElementById('apiBadge');badge.className='api-badge checking';badge.textContent='● CHECKING...';
   if(activeTab==='fb'){
-    if(!FB_TOKEN){badge.className='api-badge err';badge.textContent='● NO TOKEN';return;}
-    fetch(`https://graph.facebook.com/v21.0/me?access_token=${FB_TOKEN}`).then(r=>r.json()).then(d=>{badge.className=d.error?'api-badge err':'api-badge ok';badge.textContent=d.error?'● INVALID TOKEN':'● FB TOKEN OK';}).catch(()=>{badge.className='api-badge err';badge.textContent='● CHECK FAILED';});
+    // Verify Apify token
+    fetch(`https://api.apify.com/v2/users/me?token=${APIFY_TOKEN}`)
+      .then(r=>r.json())
+      .then(d=>{
+        if(d.error||d.type==='error'){badge.className='api-badge err';badge.textContent='● APIFY ERR';}
+        else{badge.className='api-badge ok';badge.textContent=`● APIFY OK · $${d.data?.plan?.monthlyUsageCreditsUsd||'?'} plan`;}
+      }).catch(()=>{badge.className='api-badge ok';badge.textContent='● APIFY READY';});
   }else{
     if(!GG_KEY){badge.className='api-badge err';badge.textContent='● NO API KEY';return;}
-    fetch(`https://serpapi.com/account.json?api_key=${GG_KEY}`).then(r=>r.json()).then(d=>{badge.className=d.error?'api-badge err':'api-badge ok';badge.textContent=d.error?'● INVALID KEY':`● SERP OK · ${d.plan_searches_left||'?'} left`;}).catch(()=>{badge.className='api-badge ok';badge.textContent='● SERP KEY LOADED';});
+    fetch(`https://serpapi.com/account.json?api_key=${GG_KEY}`).then(r=>r.json()).then(d=>{
+      badge.className=d.error?'api-badge err':'api-badge ok';
+      badge.textContent=d.error?'● INVALID KEY':`● SERP OK · ${d.plan_searches_left||'?'} left`;
+    }).catch(()=>{badge.className='api-badge ok';badge.textContent='● SERP KEY LOADED';});
   }
 }
 
