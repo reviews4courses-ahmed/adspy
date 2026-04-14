@@ -1,3 +1,5 @@
+// Step 1: Just start the Apify run and return the run ID immediately
+// Frontend will poll Apify directly for results (avoids Vercel 10s timeout)
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -12,32 +14,29 @@ export default async function handler(req, res) {
   const fbUrl = `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=${countryCode}&q=${encodeURIComponent(keyword)}&search_type=keyword_unordered&media_type=all`;
 
   try {
-    // Use synchronous run endpoint — returns results directly, no polling needed
     const runRes = await fetch(
-      `https://api.apify.com/v2/acts/apify~facebook-ads-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&format=json&limit=${maxItems}`,
+      `https://api.apify.com/v2/acts/apify~facebook-ads-scraper/runs?token=${APIFY_TOKEN}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           startUrls: [{ url: fbUrl }],
           maxItems: maxItems,
-          proxy: { useApifyProxy: true, apifyProxyGroups: ['RESIDENTIAL'] },
         })
       }
     );
 
-    if (!runRes.ok) {
-      const errText = await runRes.text();
-      let errMsg = errText;
-      try { errMsg = JSON.parse(errText)?.error?.message || errText; } catch(e) {}
-      return res.status(500).json({ error: `Apify error: ${errMsg}` });
+    const runData = await runRes.json();
+    if (!runRes.ok || runData.error) {
+      return res.status(500).json({ error: runData.error?.message || 'Failed to start Apify run' });
     }
 
-    const items = await runRes.json();
+    // Return run ID and token so frontend can poll directly
     return res.status(200).json({
-      success: true,
-      data: Array.isArray(items) ? items : [],
-      count: Array.isArray(items) ? items.length : 0
+      runId: runData.data?.id,
+      datasetId: runData.data?.defaultDatasetId,
+      token: APIFY_TOKEN,
+      status: runData.data?.status
     });
 
   } catch (err) {
