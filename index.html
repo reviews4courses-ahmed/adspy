@@ -778,63 +778,95 @@ function detectVertical(text){
 }
 
 // ═══════════════════════════════════════════
-//  FACEBOOK FETCH (via Apify)
+//  FACEBOOK FETCH (via Apify — two-step)
 // ═══════════════════════════════════════════
 async function fetchFb(keyword,label,after=null){
   if(isLoading)return;
   isLoading=true;currentKw=keyword;currentLabel=label;
-  showFbLoading(keyword);
+  showFbLoading(keyword,'Starting Apify scraper...');
+
   const country=document.getElementById('fCountry').value;
   const limit=document.getElementById('ffLimit')?document.getElementById('ffLimit').value:24;
+
   try{
-    const params=new URLSearchParams({keyword,country,limit,token:APIFY_TOKEN});
-    const res=await fetch(`/api/apify?${params}`);
-    const data=await res.json();
-    if(data.error){showFbErr(data.error);return;}
-    // Normalize Apify data to internal format
-    fbRawAds=(data.data||[]).map((item,idx)=>{
-      const ad=normalizeApifyAd(item,idx);
-      const ppc=scorePpc(ad);
-      return{...ad,_ppcScore:ppc.score,_ppcLabel:ppc.label,_phones:ppc.phones,_isCallCta:ppc.isCallCta,_vertical:ppc.vertical};
-    });
-    fbCursor=null; // Apify handles pagination differently
-    fbFilteredAds=applyFbFilters(fbRawAds);
-    updateFbStats(fbRawAds,fbFilteredAds);
-    renderFbResults(fbFilteredAds);
-    renderFbIntel(fbFilteredAds);
-  }catch(e){showFbErr('Network error: '+e.message);}
+    // Step 1: Start the run via our Vercel proxy (fast, < 3s)
+    const startParams=new URLSearchParams({keyword,country,limit});
+    const startRes=await fetch(`/api/apify?${startParams}`);
+    const startData=await startRes.json();
+
+    if(startData.error){showFbErr(startData.error);return;}
+
+    const{runId,token}=startData;
+    if(!runId){showFbErr('No run ID from Apify');return;}
+
+    // Step 2: Poll Apify directly from browser (bypasses Vercel timeout)
+    showFbLoading(keyword,'Scraping Facebook ads... (~30s)');
+    let attempts=0;
+    while(attempts<60){
+      await new Promise(r=>setTimeout(r,3000));
+      attempts++;
+      showFbLoading(keyword,`Scraping... ${attempts*3}s elapsed`);
+
+      const statusRes=await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${token}`);
+      const statusData=await statusRes.json();
+      const status=statusData.data?.status;
+
+      if(status==='SUCCEEDED'){
+        const datasetId=statusData.data?.defaultDatasetId;
+        const itemsRes=await fetch(
+          `https://api.apify.com/v2/datasets/${datasetId}/items?token=${token}&limit=${limit}&format=json`
+        );
+        const items=await itemsRes.json();
+        const rawItems=Array.isArray(items)?items:[];
+
+        // Normalize Apify data
+        fbRawAds=rawItems.map((item,idx)=>{
+          const ad=normalizeApifyAd(item,idx);
+          const ppc=scorePpc(ad);
+          return{...ad,_ppcScore:ppc.score,_ppcLabel:ppc.label,_phones:ppc.phones,_isCallCta:ppc.isCallCta,_vertical:ppc.vertical};
+        });
+        fbCursor=null;
+        fbFilteredAds=applyFbFilters(fbRawAds);
+        updateFbStats(fbRawAds,fbFilteredAds);
+        renderFbResults(fbFilteredAds);
+        renderFbIntel(fbFilteredAds);
+        return;
+      }
+
+      if(status==='FAILED'||status==='ABORTED'||status==='TIMED-OUT'){
+        showFbErr(`Apify run ${status}. Try a simpler keyword or fewer results.`);
+        return;
+      }
+    }
+    showFbErr('Apify timed out after 3 minutes. Try fewer results.');
+
+  }catch(e){showFbErr('Error: '+e.message);}
   finally{isLoading=false;}
 }
 
-// Normalize Apify response to match our internal ad format
-function normalizeApifyAd(item, idx){
-  // Extract images from snapshot
+// Normalize Apify response to internal ad format
+function normalizeApifyAd(item,idx){
   const snapImgs=item.snapshot?.images||[];
   const snapVids=item.snapshot?.videos||[];
   const imgUrl=snapImgs[0]?.resizedImageUrl||snapImgs[0]?.originalImageUrl||'';
   const vidUrl=snapVids[0]?.videoSdUrl||snapVids[0]?.videoHdUrl||'';
   const posterUrl=snapVids[0]?.videoPreviewImageUrl||'';
-
-  return {
-    id: item.adArchiveID||item.id||('apify_'+idx),
-    page_name: item.pageName||item.page_name||'Unknown',
-    page_id: item.pageID||item.page_id||'',
-    ad_creative_bodies: [item.adCreativeBody||item.snapshot?.body?.markup?.__html||item.body||''],
-    ad_creative_link_titles: [item.adCreativeLinkTitle||item.snapshot?.title||item.title||''],
-    ad_creative_link_captions: [item.adCreativeLinkCaption||item.displayFormat||item.domain||''],
-    ad_snapshot_url: item.snapshot?.url||item.snapshotUrl||`https://www.facebook.com/ads/library/?id=${item.adArchiveID}`,
-    ad_creation_time: item.startDate||item.startedRunningDate||null,
-    ad_delivery_stop_time: item.endDate||item.stoppedRunningDate||null,
-    publisher_platforms: item.publisherPlatform||['facebook'],
-    spend: item.spend||null,
-    impressions: item.impressions||null,
-    // Creative fields
-    ad_creative_images: imgUrl?[{original_image_url:imgUrl,url:imgUrl}]:[],
-    ad_creative_videos: vidUrl?[{video_sd_url:vidUrl,video_hd_url:vidUrl,video_preview_image_url:posterUrl}]:[],
-    // Raw Apify data preserved
-    _apify: item,
-    _imgUrl: imgUrl,
-    _vidUrl: vidUrl,
+  return{
+    id:item.adArchiveID||item.id||('apify_'+idx),
+    page_name:item.pageName||item.page_name||'Unknown',
+    page_id:item.pageID||item.page_id||'',
+    ad_creative_bodies:[item.adCreativeBody||item.snapshot?.body?.markup?.__html||item.body||''],
+    ad_creative_link_titles:[item.adCreativeLinkTitle||item.snapshot?.title||item.title||''],
+    ad_creative_link_captions:[item.adCreativeLinkCaption||item.displayFormat||item.domain||''],
+    ad_snapshot_url:item.snapshot?.url||item.snapshotUrl||`https://www.facebook.com/ads/library/?id=${item.adArchiveID}`,
+    ad_creation_time:item.startDate||item.startedRunningDate||null,
+    ad_delivery_stop_time:item.endDate||item.stoppedRunningDate||null,
+    publisher_platforms:item.publisherPlatform||['facebook'],
+    spend:item.spend||null,
+    impressions:item.impressions||null,
+    ad_creative_images:imgUrl?[{original_image_url:imgUrl,url:imgUrl}]:[],
+    ad_creative_videos:vidUrl?[{video_sd_url:vidUrl,video_hd_url:vidUrl,video_preview_image_url:posterUrl}]:[],
+    _apify:item,_imgUrl:imgUrl,_vidUrl:vidUrl,
   };
 }
 
@@ -1205,8 +1237,9 @@ function goFbPage(dir){
 }
 function updateFbPag(){/* handled inline in renderFbResults */}
 
-function showFbLoading(kw){
-  document.getElementById('fbc-results').innerHTML=`<div class="state-wrap"><div class="spinner fb-spin"></div><div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:4px">Fetching Facebook ads via Apify...</div><div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;opacity:.6">"${esc(kw)}" · this takes ~30 seconds</div></div>`;
+function showFbLoading(kw,msg){
+  const m=msg||'Fetching Facebook ads via Apify...';
+  document.getElementById('fbc-results').innerHTML=`<div class="state-wrap"><div class="spinner fb-spin"></div><div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-top:4px">${esc(m)}</div><div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;opacity:.6">"${esc(kw)}"</div></div>`;
 }
 function showFbErr(msg){
   isLoading=false;
