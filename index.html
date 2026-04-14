@@ -7,402 +7,192 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #07090c;
-  --s1: #0c0f14;
-  --s2: #111620;
-  --s3: #171e2a;
-  --border: #1d2535;
-  --border2: #243040;
-  --green: #00e5a0;
-  --green-dim: rgba(0,229,160,0.12);
-  --green-glow: rgba(0,229,160,0.06);
-  --blue: #3d8ef8;
-  --blue-dim: rgba(61,142,248,0.12);
-  --yellow: #f5a623;
-  --yellow-dim: rgba(245,166,35,0.12);
-  --red: #ff4d6a;
-  --red-dim: rgba(255,77,106,0.1);
-  --purple: #a78bfa;
-  --purple-dim: rgba(167,139,250,0.1);
-  --text: #dce8f5;
-  --text2: #8a9bb5;
-  --text3: #4a5a70;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'Inter', sans-serif;
+  --bg:#07090c;--s1:#0c0f14;--s2:#111620;--border:#1d2535;--border2:#243040;
+  --green:#00e5a0;--green-dim:rgba(0,229,160,.12);--green-glow:rgba(0,229,160,.06);
+  --blue:#3d8ef8;--blue-dim:rgba(61,142,248,.12);
+  --yellow:#f5a623;--yellow-dim:rgba(245,166,35,.12);
+  --red:#ff4d6a;--red-dim:rgba(255,77,106,.1);
+  --orange:#ff6b35;--fb:#1877f2;
+  --text:#dce8f5;--text2:#8a9bb5;--text3:#4a5a70;
+  --mono:'IBM Plex Mono',monospace;--sans:'Inter',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex;flex-direction:column}
-
-/* ── TOPBAR ── */
-.topbar{
-  height:52px;min-height:52px;
-  background:var(--s1);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;
-  padding:0 20px;gap:16px;
-  z-index:100;
-}
-.logo{
-  font-family:var(--mono);font-size:13px;font-weight:700;
-  color:var(--green);letter-spacing:.06em;
-  display:flex;align-items:center;gap:8px;flex-shrink:0;
-}
+.topbar{height:52px;min-height:52px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:0;z-index:100}
+.logo{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green);letter-spacing:.06em;display:flex;align-items:center;gap:8px;flex-shrink:0;margin-right:20px}
 .logo-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-
-.top-search{
-  flex:1;max-width:500px;
-  display:flex;align-items:center;gap:0;
-  background:var(--s2);border:1px solid var(--border2);border-radius:8px;overflow:hidden;
-}
-.top-search input{
-  flex:1;background:transparent;border:none;outline:none;
-  color:var(--text);font-family:var(--sans);font-size:13px;
-  padding:9px 14px;
-}
+.tabs{display:flex;height:100%;align-items:flex-end;margin-right:20px}
+.tab-btn{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;padding:0 20px;height:42px;border:none;cursor:pointer;background:transparent;color:var(--text3);border-bottom:2px solid transparent;display:flex;align-items:center;gap:7px;transition:all .15s}
+.tab-btn.active-fb{color:var(--fb);border-bottom-color:var(--fb)}
+.tab-btn.active-gg{color:var(--orange);border-bottom-color:var(--orange)}
+.top-search{flex:1;max-width:480px;display:flex;align-items:center;background:var(--s2);border:1px solid var(--border2);border-radius:8px;overflow:hidden}
+.top-search input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 14px}
 .top-search input::placeholder{color:var(--text3)}
-.top-search button{
-  background:var(--green);border:none;color:#000;
-  font-family:var(--mono);font-size:11px;font-weight:700;
-  padding:9px 16px;cursor:pointer;letter-spacing:.05em;
-  transition:opacity .15s;flex-shrink:0;
-}
-.top-search button:hover{opacity:.85}
-
-.top-filters{
-  display:flex;gap:8px;align-items:center;margin-left:auto;flex-shrink:0;
-}
-.filter-sel{
-  background:var(--s2);border:1px solid var(--border2);
-  color:var(--text2);font-family:var(--mono);font-size:11px;
-  padding:6px 10px;border-radius:6px;outline:none;cursor:pointer;
-  appearance:none;-webkit-appearance:none;
-}
-.filter-sel:focus{border-color:var(--blue)}
-.cfg-btn{
-  background:var(--s2);border:1px solid var(--border2);
-  color:var(--text2);font-family:var(--mono);font-size:11px;
-  padding:6px 12px;border-radius:6px;cursor:pointer;
-  transition:all .15s;flex-shrink:0;
-}
-.cfg-btn:hover{border-color:var(--green);color:var(--green)}
-.token-badge{
-  font-family:var(--mono);font-size:10px;padding:4px 10px;
-  border-radius:20px;flex-shrink:0;letter-spacing:.04em;
-}
-.token-badge.ok{background:var(--green-dim);border:1px solid rgba(0,229,160,.25);color:var(--green)}
-.token-badge.err{background:var(--red-dim);border:1px solid rgba(255,77,106,.25);color:var(--red)}
-.token-badge.checking{background:rgba(90,112,128,.12);border:1px solid var(--border2);color:var(--text3)}
-
-/* ── LAYOUT ── */
+.search-btn{border:none;color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;padding:9px 16px;cursor:pointer;transition:opacity .15s;flex-shrink:0}
+.search-btn.fb-btn{background:var(--fb)}.search-btn.gg-btn{background:var(--orange)}
+.top-filters{display:flex;gap:8px;align-items:center;margin-left:auto;flex-shrink:0}
+.filter-sel{background:var(--s2);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:6px;outline:none;cursor:pointer;appearance:none}
+.cfg-btn{background:var(--s2);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .15s}
+.api-badge{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:20px;flex-shrink:0;letter-spacing:.04em}
+.api-badge.ok{background:var(--green-dim);border:1px solid rgba(0,229,160,.25);color:var(--green)}
+.api-badge.err{background:var(--red-dim);border:1px solid rgba(255,77,106,.25);color:var(--red)}
+.api-badge.checking{background:rgba(90,112,128,.12);border:1px solid var(--border2);color:var(--text3)}
 .body{display:flex;flex:1;overflow:hidden}
-
-/* ── SIDEBAR ── */
-.sidebar{
-  width:230px;min-width:230px;
-  background:var(--s1);border-right:1px solid var(--border);
-  overflow-y:auto;padding:12px 0;
-}
-.sidebar::-webkit-scrollbar{width:4px}
-.sidebar::-webkit-scrollbar-track{background:transparent}
-.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-
-.cat-label{
-  font-family:var(--mono);font-size:9px;font-weight:700;
-  letter-spacing:.14em;color:var(--text3);text-transform:uppercase;
-  padding:12px 16px 6px;
-}
-.vertical-btn{
-  width:100%;background:transparent;border:none;
-  text-align:left;cursor:pointer;
-  padding:7px 16px;
-  display:flex;align-items:center;gap:10px;
-  color:var(--text2);font-family:var(--sans);font-size:12px;font-weight:500;
-  transition:all .12s;border-left:2px solid transparent;
-}
+.sidebar{width:225px;min-width:225px;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0}
+.sidebar::-webkit-scrollbar{width:4px}.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.cat-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--text3);text-transform:uppercase;padding:12px 16px 6px}
+.vertical-btn{width:100%;background:transparent;border:none;text-align:left;cursor:pointer;padding:7px 16px;display:flex;align-items:center;gap:10px;color:var(--text2);font-family:var(--sans);font-size:12px;font-weight:500;transition:all .12s;border-left:2px solid transparent}
 .vertical-btn:hover{background:var(--s2);color:var(--text);border-left-color:var(--border2)}
-.vertical-btn.active{background:var(--green-glow);color:var(--green);border-left-color:var(--green)}
-.vertical-btn .vicon{font-size:14px;flex-shrink:0;width:18px;text-align:center}
-.vertical-btn .vname{flex:1}
-.vertical-btn .vtag{
-  font-family:var(--mono);font-size:9px;
-  background:var(--blue-dim);border:1px solid rgba(61,142,248,.2);
-  color:var(--blue);padding:1px 6px;border-radius:3px;flex-shrink:0;
-}
-.vertical-btn.active .vtag{background:var(--green-dim);border-color:rgba(0,229,160,.25);color:var(--green)}
-
+.vertical-btn.active-fb{background:rgba(24,119,242,.06);color:var(--fb);border-left-color:var(--fb)}
+.vertical-btn.active-gg{background:rgba(255,107,53,.06);color:var(--orange);border-left-color:var(--orange)}
+.vicon{font-size:14px;flex-shrink:0;width:18px;text-align:center}
 .sidebar-divider{height:1px;background:var(--border);margin:8px 0}
-
-/* ── MAIN ── */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-
-/* ── RESULTS HEADER ── */
-.results-header{
-  padding:14px 20px;
-  background:var(--s1);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:16px;flex-shrink:0;
-}
+.results-header{padding:13px 20px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-shrink:0}
 .rh-title{font-size:14px;font-weight:700;color:var(--text)}
 .rh-sub{font-family:var(--mono);font-size:11px;color:var(--text3)}
 .rh-stats{display:flex;gap:12px;margin-left:auto}
-.rh-stat{
-  font-family:var(--mono);font-size:11px;
-  display:flex;align-items:center;gap:5px;
-}
-.rh-stat .val{color:var(--green);font-weight:700}
-.rh-stat .lbl{color:var(--text3)}
-.sort-sel{
-  background:var(--s2);border:1px solid var(--border2);
-  color:var(--text2);font-family:var(--mono);font-size:10px;
-  padding:5px 8px;border-radius:5px;outline:none;cursor:pointer;
-  appearance:none;
-}
-
-/* ── AD GRID ── */
+.rh-stat{font-family:var(--mono);font-size:11px;display:flex;align-items:center;gap:5px}
+.rh-stat .val{font-weight:700}.rh-stat .lbl{color:var(--text3)}
+.val-fb{color:var(--fb)}.val-gg{color:var(--orange)}
+.sort-sel{background:var(--s2);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:10px;padding:5px 8px;border-radius:5px;outline:none;cursor:pointer;appearance:none}
 .grid-wrap{flex:1;overflow-y:auto;padding:16px 20px}
-.grid-wrap::-webkit-scrollbar{width:5px}
-.grid-wrap::-webkit-scrollbar-track{background:transparent}
-.grid-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-
-.ad-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-  gap:14px;
-}
-
-/* ── AD CARD ── */
-.ad-card{
-  background:var(--s1);border:1px solid var(--border);border-radius:10px;
-  overflow:hidden;transition:border-color .18s,box-shadow .18s;
-  animation:cardIn .25s ease both;display:flex;flex-direction:column;
-}
-.ad-card:hover{border-color:var(--border2);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.grid-wrap::-webkit-scrollbar{width:5px}.grid-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.ad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.ad-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .18s,box-shadow .18s;animation:cardIn .25s ease both;display:flex;flex-direction:column}
+.ad-card.fb-card:hover{border-color:rgba(24,119,242,.3);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.ad-card.gg-card:hover{border-color:rgba(255,107,53,.3);box-shadow:0 4px 20px rgba(0,0,0,.3)}
 @keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* card head */
-.card-head{
-  padding:12px 14px 10px;
-  display:flex;align-items:flex-start;justify-content:space-between;gap:8px;
-  border-bottom:1px solid var(--border);
-}
+.card-head{padding:12px 14px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border)}
 .page-info{flex:1;min-width:0}
-.page-name{
-  font-size:13px;font-weight:600;color:var(--text);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.page-id{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:2px}
-.card-platforms{display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
-.plat{
-  font-family:var(--mono);font-size:8px;letter-spacing:.04em;
-  padding:2px 6px;border-radius:3px;text-transform:uppercase;
-}
+.page-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.page-sub{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.page-sub.gg-sub{color:var(--orange)}
+.card-badges{display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.plat{font-family:var(--mono);font-size:8px;letter-spacing:.04em;padding:2px 6px;border-radius:3px;text-transform:uppercase}
 .plat.fb{background:rgba(24,119,242,.15);border:1px solid rgba(24,119,242,.3);color:#4d94ff}
 .plat.ig{background:rgba(193,53,132,.12);border:1px solid rgba(193,53,132,.25);color:#e1699a}
-.plat.an{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);color:var(--yellow)}
-.plat.ms{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:var(--purple)}
-
-/* creative */
-.card-creative{
-  position:relative;background:var(--s2);
-  display:none;border-bottom:1px solid var(--border);
-}
+.plat.an{background:var(--yellow-dim);border:1px solid rgba(245,166,35,.2);color:var(--yellow)}
+.pos-badge{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px}
+.pos-badge.top{background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.25);color:var(--orange)}
+.pos-badge.bot{background:rgba(90,112,128,.12);border:1px solid var(--border2);color:var(--text3)}
+.card-creative{position:relative;background:var(--s2);display:none;border-bottom:1px solid var(--border)}
 .card-creative.visible{display:block}
-.card-creative img{width:100%;max-height:220px;object-fit:cover;display:block}
-.card-creative video{width:100%;max-height:220px;object-fit:cover;display:block}
-.creative-iframe{width:100%;height:220px;border:none;display:block;background:#fff}
-.creative-overlay{
-  position:absolute;top:8px;right:8px;display:flex;gap:5px;
-}
-.c-btn{
-  background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.15);
-  color:#fff;border-radius:5px;padding:4px 8px;
-  font-family:var(--mono);font-size:9px;cursor:pointer;
-  text-decoration:none;transition:all .12s;display:flex;align-items:center;gap:3px;
-}
-.c-btn:hover{background:var(--green-dim);color:var(--green);border-color:rgba(0,229,160,.3)}
-
-/* card body */
+.card-creative img{width:100%;max-height:200px;object-fit:cover;display:block}
+.card-creative video{width:100%;max-height:200px;object-fit:cover;display:block}
+.creative-iframe{width:100%;height:200px;border:none;display:block;background:#fff}
+.creative-overlay{position:absolute;top:8px;right:8px;display:flex;gap:5px}
+.c-btn{background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:5px;padding:4px 8px;font-family:var(--mono);font-size:9px;cursor:pointer;text-decoration:none;transition:all .12s}
 .card-body{padding:12px 14px;flex:1}
-
-.ad-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.4}
-.ad-body{
-  font-size:11px;color:var(--text2);line-height:1.6;
-  max-height:72px;overflow:hidden;position:relative;
-  margin-bottom:8px;
-}
-.ad-body.exp{max-height:none}
-.expand-txt{
-  background:none;border:none;color:var(--blue);
-  font-family:var(--mono);font-size:9px;cursor:pointer;
-  padding:0;margin-bottom:10px;display:block;
-}
-
-/* domain row */
-.domain-row{
-  display:flex;align-items:center;gap:6px;
-  background:var(--s2);border:1px solid var(--border);
-  border-radius:5px;padding:5px 9px;margin-bottom:8px;
-}
-.domain-lbl{font-family:var(--mono);font-size:8px;color:var(--text3);flex-shrink:0}
-.domain-val{font-family:var(--mono);font-size:10px;color:var(--blue);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.full-url-val{font-family:var(--mono);font-size:8px;color:var(--text3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-/* chips */
-.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
-.chip{
-  font-family:var(--mono);font-size:9px;
-  padding:2px 7px;border-radius:4px;
-  display:flex;align-items:center;gap:3px;
-}
+.ad-headline{font-size:13px;font-weight:600;color:var(--blue);line-height:1.4;margin-bottom:6px}
+.ad-title-fb{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.4}
+.ad-body-text{font-size:11px;color:var(--text2);line-height:1.6;max-height:68px;overflow:hidden;margin-bottom:6px}
+.ad-body-text.exp{max-height:none}
+.expand-txt{background:none;border:none;color:var(--blue);font-family:var(--mono);font-size:9px;cursor:pointer;padding:0;margin-bottom:8px;display:block}
+.sitelinks{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.sitelink{font-family:var(--mono);font-size:9px;background:var(--s2);border:1px solid var(--border2);color:var(--blue);padding:2px 8px;border-radius:4px;white-space:nowrap;overflow:hidden;max-width:140px;text-overflow:ellipsis}
+.url-row{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:6px 9px;margin-bottom:8px;cursor:pointer;transition:border-color .12s}
+.url-row:hover{border-color:var(--text2)}
+.url-lbl{font-family:var(--mono);font-size:8px;color:var(--text3);flex-shrink:0}
+.url-val{font-family:var(--mono);font-size:9px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.url-val.fb-url{color:var(--fb)}.url-val.gg-url{color:var(--orange)}
+.copy-btn{font-family:var(--mono);font-size:8px;color:var(--text3);background:none;border:none;cursor:pointer;flex-shrink:0}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.chip{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:4px;display:flex;align-items:center;gap:3px}
 .chip.spend{background:var(--yellow-dim);border:1px solid rgba(245,166,35,.25);color:var(--yellow)}
 .chip.imp{background:var(--green-dim);border:1px solid rgba(0,229,160,.2);color:var(--green)}
 .chip.date{background:rgba(90,112,128,.1);border:1px solid var(--border2);color:var(--text3)}
-.chip.active{background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);color:var(--green)}
-.chip.inactive{background:var(--red-dim);border:1px solid rgba(255,77,106,.2);color:var(--red)}
-
-/* card footer */
-.card-foot{
-  padding:9px 14px;border-top:1px solid var(--border);
-  display:flex;align-items:center;gap:6px;
-}
-.foot-btn{
-  font-family:var(--mono);font-size:9px;letter-spacing:.04em;
-  padding:5px 10px;border-radius:5px;cursor:pointer;
-  transition:all .12s;display:flex;align-items:center;gap:4px;
-  border:1px solid var(--border2);background:transparent;color:var(--text2);
-  text-decoration:none;
-}
-.foot-btn:hover{border-color:var(--blue);color:var(--blue)}
-.foot-btn.green:hover{border-color:var(--green);color:var(--green)}
-.foot-btn.ml{margin-left:auto}
-
-/* ── EMPTY / LOADING / ERROR ── */
-.state-wrap{
-  grid-column:1/-1;
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;padding:80px 40px;gap:14px;
-  text-align:center;
-}
-.state-icon{font-size:42px;opacity:.25}
-.state-title{font-size:15px;font-weight:600;color:var(--text2)}
+.chip.active-chip{background:var(--green-dim);border:1px solid rgba(0,229,160,.2);color:var(--green)}
+.chip.inactive-chip{background:var(--red-dim);border:1px solid rgba(255,77,106,.2);color:var(--red)}
+.chip.pos-top{background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.2);color:var(--orange)}
+.chip.pos-bot{background:rgba(90,112,128,.1);border:1px solid var(--border2);color:var(--text3)}
+.chip.call{background:var(--green-dim);border:1px solid rgba(0,229,160,.2);color:var(--green)}
+.chip.rating{background:var(--yellow-dim);border:1px solid rgba(245,166,35,.2);color:var(--yellow)}
+.card-foot{padding:9px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.foot-btn{font-family:var(--mono);font-size:9px;padding:5px 10px;border-radius:5px;cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);text-decoration:none}
+.foot-btn:hover{border-color:var(--text);color:var(--text)}.foot-btn.ml{margin-left:auto}
+.state-wrap{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 40px;gap:14px;text-align:center}
+.state-icon{font-size:42px;opacity:.25}.state-title{font-size:15px;font-weight:600;color:var(--text2)}
 .state-sub{font-family:var(--mono);font-size:11px;color:var(--text3);line-height:1.7}
-.spinner{
-  width:36px;height:36px;border:3px solid var(--border2);
-  border-top-color:var(--green);border-radius:50%;
-  animation:spin .75s linear infinite;
-}
+.spinner{width:36px;height:36px;border:3px solid var(--border2);border-radius:50%;animation:spin .75s linear infinite}
+.spinner.fb-spin{border-top-color:var(--fb)}.spinner.gg-spin{border-top-color:var(--orange)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-kw{font-family:var(--mono);font-size:12px;color:var(--text3)}
-
-.err-box{
-  grid-column:1/-1;
-  background:var(--red-dim);border:1px solid rgba(255,77,106,.3);
-  color:var(--red);padding:14px 18px;border-radius:8px;
-  font-family:var(--mono);font-size:11px;line-height:1.7;
-}
-
-/* ── PAGINATION ── */
-.pagination{
-  display:flex;align-items:center;justify-content:center;
-  gap:10px;padding:16px 0;border-top:1px solid var(--border);
-  margin-top:8px;
-}
-.pg-btn{
-  background:var(--s1);border:1px solid var(--border2);
-  color:var(--text2);font-family:var(--mono);font-size:10px;
-  padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .12s;
-}
-.pg-btn:hover:not(:disabled){border-color:var(--green);color:var(--green)}
-.pg-btn:disabled{opacity:.3;cursor:not-allowed}
+.err-box{grid-column:1/-1;background:var(--red-dim);border:1px solid rgba(255,77,106,.3);color:var(--red);padding:14px 18px;border-radius:8px;font-family:var(--mono);font-size:11px;line-height:1.7}
+.pagination{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 0;border-top:1px solid var(--border);margin-top:8px}
+.pg-btn{background:var(--s1);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:10px;padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .12s}
+.pg-btn:hover:not(:disabled){border-color:var(--text);color:var(--text)}.pg-btn:disabled{opacity:.3;cursor:not-allowed}
 .pg-info{font-family:var(--mono);font-size:10px;color:var(--text3)}
-
-/* ── MODAL ── */
-.modal-bg{
-  position:fixed;inset:0;background:rgba(0,0,0,.75);
-  z-index:200;display:flex;align-items:center;justify-content:center;
-  backdrop-filter:blur(6px);
-}
-.modal{
-  background:var(--s2);border:1px solid var(--border2);
-  border-radius:14px;padding:28px;width:460px;max-width:95vw;
-  box-shadow:0 24px 60px rgba(0,0,0,.5);
-}
-.modal h3{font-family:var(--mono);font-size:13px;color:var(--green);letter-spacing:.08em;margin-bottom:20px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.modal{background:var(--s2);border:1px solid var(--border2);border-radius:14px;padding:28px;width:500px;max-width:95vw;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.modal h3{font-family:var(--mono);font-size:13px;letter-spacing:.08em;margin-bottom:6px}
+.modal h3.fb-h{color:var(--fb)}.modal h3.gg-h{color:var(--orange)}
+.modal-desc{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:20px;line-height:1.6}
 .f-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--text3);text-transform:uppercase;margin-bottom:6px;margin-top:14px}
-.f-input{
-  width:100%;background:var(--s1);border:1px solid var(--border2);
-  border-radius:7px;padding:9px 13px;color:var(--text);
-  font-family:var(--mono);font-size:11px;outline:none;
-}
-.f-input:focus{border-color:var(--green)}
-.f-note{
-  font-family:var(--mono);font-size:9px;color:var(--text3);
-  line-height:1.7;margin-top:8px;padding:9px 11px;
-  background:var(--s1);border-radius:5px;
-  border-left:2px solid var(--blue);
-}
+.f-input{width:100%;background:var(--s1);border:1px solid var(--border2);border-radius:7px;padding:9px 13px;color:var(--text);font-family:var(--mono);font-size:11px;outline:none}
+.f-input:focus{border-color:var(--text2)}
+.f-note{font-family:var(--mono);font-size:9px;color:var(--text3);line-height:1.7;margin-top:8px;padding:9px 11px;background:var(--s1);border-radius:5px;border-left:2px solid var(--border2)}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:22px}
 .btn-cancel{background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:7px;padding:8px 16px;font-family:var(--mono);font-size:10px;cursor:pointer}
-.btn-save{background:var(--green);border:none;color:#000;border-radius:7px;padding:8px 16px;font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer}
-
+.btn-save{border:none;color:#fff;border-radius:7px;padding:8px 16px;font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer}
+.btn-save.fb-save{background:var(--fb)}.btn-save.gg-save{background:var(--orange)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#000;font-family:var(--mono);font-size:11px;font-weight:700;padding:8px 16px;border-radius:8px;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
 .hidden{display:none!important}
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="logo"><div class="logo-dot"></div>ADSPY</div>
-
+  <div class="tabs">
+    <button class="tab-btn active-fb" id="tabFb" onclick="switchTab('fb')">📘 FACEBOOK</button>
+    <button class="tab-btn" id="tabGg" onclick="switchTab('gg')">🔍 GOOGLE ADS</button>
+  </div>
   <div class="top-search">
     <input type="text" id="searchInput" placeholder="Search any pay-per-call keyword..." onkeydown="if(event.key==='Enter')doSearch()">
-    <button onclick="doSearch()">SEARCH</button>
+    <button class="search-btn fb-btn" id="searchBtn" onclick="doSearch()">SEARCH</button>
   </div>
-
   <div class="top-filters">
     <select class="filter-sel" id="fCountry">
-      <option value="US">🇺🇸 US</option>
-      <option value="GB">🇬🇧 UK</option>
-      <option value="CA">🇨🇦 Canada</option>
-      <option value="AU">🇦🇺 Australia</option>
+      <option value="us">🇺🇸 US</option>
+      <option value="gb">🇬🇧 UK</option>
+      <option value="ca">🇨🇦 Canada</option>
+      <option value="au">🇦🇺 Australia</option>
+    </select>
+    <select class="filter-sel" id="fDevice" style="display:none">
+      <option value="desktop">🖥 Desktop</option>
+      <option value="mobile">📱 Mobile</option>
     </select>
     <select class="filter-sel" id="fLimit">
       <option value="24">24 ads</option>
       <option value="48">48 ads</option>
-      <option value="96">96 ads</option>
     </select>
-    <span class="token-badge checking" id="tokenBadge">● CHECKING...</span>
+    <span class="api-badge checking" id="apiBadge">● CHECKING...</span>
     <button class="cfg-btn" onclick="openCfg()">⚙ CONFIG</button>
   </div>
 </div>
 
-<!-- BODY -->
 <div class="body">
-
-  <!-- SIDEBAR -->
-  <div class="sidebar" id="sidebar">
-    <!-- built by JS -->
-  </div>
-
-  <!-- MAIN -->
+  <div class="sidebar" id="sidebar"></div>
   <div class="main">
-    <div class="results-header" id="resultsHeader" style="display:none">
+    <div class="results-header hidden" id="resultsHeader">
       <div>
         <div class="rh-title" id="rhTitle">—</div>
         <div class="rh-sub" id="rhSub"></div>
       </div>
       <div class="rh-stats">
-        <div class="rh-stat"><span class="val" id="rhCount">0</span><span class="lbl">ads</span></div>
-        <div class="rh-stat"><span class="val" id="rhPages">0</span><span class="lbl">advertisers</span></div>
+        <div class="rh-stat"><span class="val val-fb" id="rhCount">0</span><span class="lbl">ads</span></div>
+        <div class="rh-stat"><span class="val val-fb" id="rhUniq">0</span><span class="lbl">advertisers</span></div>
       </div>
       <select class="sort-sel" id="sortSel" onchange="reSort()">
-        <option value="newest">Newest first</option>
-        <option value="oldest">Oldest first</option>
-        <option value="spend_high">Highest spend</option>
+        <option value="default">Default</option>
+        <option value="newest">Newest</option>
+        <option value="alpha">A–Z</option>
       </select>
     </div>
-
     <div class="grid-wrap">
       <div class="ad-grid" id="adGrid">
         <div class="state-wrap">
@@ -420,468 +210,279 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
   </div>
 </div>
 
-<!-- CONFIG MODAL -->
-<div class="modal-bg hidden" id="cfgModal">
+<div class="modal-bg hidden" id="fbModal">
   <div class="modal">
-    <h3>// CONFIGURATION</h3>
-    <div class="f-label">Facebook Ad Library Access Token</div>
-    <input type="text" class="f-input" id="cfgToken" placeholder="EAAJse...">
-    <div class="f-note">
-      Requires <strong>ads_read</strong> permission.<br>
-      Get from: developers.facebook.com → Tools → Graph API Explorer
-    </div>
+    <h3 class="fb-h">// FACEBOOK CONFIG</h3>
+    <div class="modal-desc">Facebook Ad Library API · requires ads_read permission</div>
+    <div class="f-label">Access Token</div>
+    <input type="text" class="f-input" id="cfgFbToken" placeholder="EAAJse...">
+    <div class="f-note">developers.facebook.com → Tools → Graph API Explorer → Generate Access Token</div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeCfg()">CANCEL</button>
-      <button class="btn-save" onclick="saveCfg()">SAVE & VERIFY</button>
+      <button class="btn-save fb-save" onclick="saveFbCfg()">SAVE & VERIFY</button>
     </div>
   </div>
 </div>
 
+<div class="modal-bg hidden" id="ggModal">
+  <div class="modal">
+    <h3 class="gg-h">// GOOGLE ADS CONFIG</h3>
+    <div class="modal-desc">SerpAPI · real-time Google search results + ads</div>
+    <div class="f-label">SerpAPI Key</div>
+    <input type="text" class="f-input" id="cfgGgKey" placeholder="d5814f57...">
+    <div class="f-label">Default Location (optional)</div>
+    <input type="text" class="f-input" id="cfgGgLoc" placeholder="e.g. New York, United States">
+    <div class="f-note">serpapi.com/manage-api-key · 100 free searches/month</div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeCfg()">CANCEL</button>
+      <button class="btn-save gg-save" onclick="saveGgCfg()">SAVE & VERIFY</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ Copied!</div>
+
 <script>
-// ═══════════════════════════════════════════════════════
-//  VERTICALS — All Marketcall pay-per-call categories
-// ═══════════════════════════════════════════════════════
-const VERTICALS = {
-  "Travel": [
-    { name:"Flight Booking",    icon:"✈️",  keys:["book flight","airline booking","cheap flights","flight deals","call airline"] },
-    { name:"Delta Air Lines",   icon:"✈️",  keys:["book delta flight","delta airlines","delta reservations","delta customer service"] },
-    { name:"Train Booking",     icon:"🚂",  keys:["train ticket booking","amtrak booking","book train ticket","train travel"] },
-    { name:"Hotel Booking",     icon:"🏨",  keys:["hotel booking","book hotel","cheap hotels","hotel deals"] },
-    { name:"Car Rental",        icon:"🚗",  keys:["car rental","rent a car","vehicle rental deals"] },
-    { name:"Cruise Booking",    icon:"🚢",  keys:["cruise booking","cruise deals","book cruise"] },
-  ],
-  "Home Services": [
-    { name:"HVAC",              icon:"❄️",  keys:["HVAC repair","AC repair service","furnace repair","heating cooling service"] },
-    { name:"Plumbing",          icon:"🔧",  keys:["plumber near me","plumbing service","emergency plumber","drain repair"] },
-    { name:"Roofing",           icon:"🏠",  keys:["roofing contractor","roof repair","roof replacement","roofer near me"] },
-    { name:"Electrical",        icon:"⚡",  keys:["electrician near me","electrical repair","licensed electrician"] },
-    { name:"Pest Control",      icon:"🐛",  keys:["pest control service","exterminator near me","bug control","termite treatment"] },
-    { name:"Lawn Care",         icon:"🌿",  keys:["lawn care service","lawn mowing near me","grass cutting","lawn maintenance"] },
-    { name:"Tree Service",      icon:"🌳",  keys:["tree removal service","tree trimming","arborist near me","tree cutting"] },
-    { name:"Water Damage",      icon:"💧",  keys:["water damage restoration","flood cleanup","water damage repair","basement flooding"] },
-    { name:"Mold Remediation",  icon:"🦠",  keys:["mold removal service","mold remediation","mold inspection","black mold removal"] },
-    { name:"Fire Damage",       icon:"🔥",  keys:["fire damage restoration","fire damage repair","smoke damage cleanup"] },
-    { name:"Foundation Repair", icon:"🏗️",  keys:["foundation repair","basement waterproofing","foundation crack repair"] },
-    { name:"Windows & Doors",   icon:"🪟",  keys:["window replacement","door replacement","window installation near me"] },
-    { name:"Solar",             icon:"☀️",  keys:["solar panel installation","solar energy","solar panels home","go solar"] },
-    { name:"Home Security",     icon:"🔐",  keys:["home security system","security alarm","home alarm installation"] },
-    { name:"Moving Services",   icon:"📦",  keys:["moving company","movers near me","local moving service","moving help"] },
-    { name:"Junk Removal",      icon:"🗑️",  keys:["junk removal service","junk hauling","trash removal near me"] },
-    { name:"Garage Door",       icon:"🚪",  keys:["garage door repair","garage door replacement","garage door service"] },
-    { name:"Gutters",           icon:"🏚️",  keys:["gutter installation","gutter cleaning","gutter repair near me"] },
-  ],
-  "Financial": [
-    { name:"Debt Settlement",   icon:"💳",  keys:["debt settlement","debt relief program","settle debt","get out of debt"] },
-    { name:"Tax Relief",        icon:"📋",  keys:["tax relief service","IRS tax debt","back taxes help","tax settlement"] },
-    { name:"Credit Repair",     icon:"📈",  keys:["credit repair service","fix my credit","improve credit score"] },
-    { name:"Mortgage",          icon:"🏦",  keys:["mortgage rates","home loan","mortgage broker","buy a home loan"] },
-    { name:"Refinance",         icon:"💰",  keys:["refinance mortgage","lower mortgage rate","refinance home loan"] },
-    { name:"Personal Loans",    icon:"💵",  keys:["personal loan","fast cash loan","get a loan today","online loan"] },
-  ],
-  "Insurance": [
-    { name:"Auto Insurance",    icon:"🚘",  keys:["auto insurance quote","car insurance rate","cheap car insurance"] },
-    { name:"Home Insurance",    icon:"🏡",  keys:["homeowners insurance","home insurance quote","house insurance"] },
-    { name:"Life Insurance",    icon:"❤️",  keys:["life insurance quote","term life insurance","life insurance rates"] },
-    { name:"Health Insurance",  icon:"🏥",  keys:["health insurance plans","affordable health insurance","health coverage"] },
-    { name:"Medicare",          icon:"💊",  keys:["Medicare plans","Medicare supplement","Medicare Advantage","Medicare enrollment"] },
-    { name:"Final Expense",     icon:"🕊️",  keys:["final expense insurance","burial insurance","funeral insurance"] },
-  ],
-  "Legal & Medical": [
-    { name:"Personal Injury",   icon:"⚖️",  keys:["personal injury lawyer","accident attorney","injury claim","car accident lawyer"] },
-    { name:"Drug Rehab",        icon:"🩺",  keys:["drug rehab center","addiction treatment","alcohol rehab","substance abuse help"] },
-    { name:"Senior Care",       icon:"👴",  keys:["senior care services","assisted living","home health care","elder care"] },
-    { name:"DUI Attorney",      icon:"🚦",  keys:["DUI lawyer","DUI attorney","drunk driving defense","DWI attorney"] },
-  ],
-};
+const VERTICALS={Travel:[{name:"Flight Booking",icon:"✈️",fbKeys:["book flight","airline booking","cheap flights"],ggKeys:["book flight cheap","airline booking phone number"]},{name:"Delta Air Lines",icon:"✈️",fbKeys:["book delta flight","delta airlines","delta reservations"],ggKeys:["book delta flight","delta airlines reservations phone"]},{name:"Train Booking",icon:"🚂",fbKeys:["train ticket booking","amtrak booking"],ggKeys:["book amtrak train","train ticket booking phone"]},{name:"Hotel Booking",icon:"🏨",fbKeys:["hotel booking","book hotel","cheap hotels"],ggKeys:["book hotel by phone","cheap hotel deals call"]},{name:"Car Rental",icon:"🚗",fbKeys:["car rental","rent a car"],ggKeys:["car rental near me call"]},{name:"Cruise Booking",icon:"🚢",fbKeys:["cruise booking","cruise deals"],ggKeys:["cruise deals call now"]}],"Home Services":[{name:"HVAC",icon:"❄️",fbKeys:["HVAC repair","AC repair service"],ggKeys:["HVAC repair near me","emergency HVAC call"]},{name:"Plumbing",icon:"🔧",fbKeys:["plumber near me","plumbing service"],ggKeys:["plumber near me call","emergency plumber"]},{name:"Roofing",icon:"🏠",fbKeys:["roofing contractor","roof repair"],ggKeys:["roofing contractor near me","roof repair call"]},{name:"Electrical",icon:"⚡",fbKeys:["electrician near me","electrical repair"],ggKeys:["electrician near me call"]},{name:"Pest Control",icon:"🐛",fbKeys:["pest control service","exterminator near me"],ggKeys:["pest control near me call"]},{name:"Lawn Care",icon:"🌿",fbKeys:["lawn care service","lawn mowing near me"],ggKeys:["lawn care service near me call"]},{name:"Tree Service",icon:"🌳",fbKeys:["tree removal service","tree trimming"],ggKeys:["tree removal service call"]},{name:"Water Damage",icon:"💧",fbKeys:["water damage restoration","flood cleanup"],ggKeys:["water damage restoration call"]},{name:"Mold Remediation",icon:"🦠",fbKeys:["mold removal service","mold remediation"],ggKeys:["mold removal service call"]},{name:"Fire Damage",icon:"🔥",fbKeys:["fire damage restoration","smoke damage"],ggKeys:["fire damage restoration call"]},{name:"Foundation Repair",icon:"🏗️",fbKeys:["foundation repair","basement waterproofing"],ggKeys:["foundation repair near me call"]},{name:"Windows & Doors",icon:"🪟",fbKeys:["window replacement","door replacement"],ggKeys:["window replacement service call"]},{name:"Solar",icon:"☀️",fbKeys:["solar panel installation","go solar"],ggKeys:["solar panel installation call"]},{name:"Home Security",icon:"🔐",fbKeys:["home security system","security alarm"],ggKeys:["home security system call"]},{name:"Moving Services",icon:"📦",fbKeys:["moving company","movers near me"],ggKeys:["moving company near me call"]},{name:"Junk Removal",icon:"🗑️",fbKeys:["junk removal service"],ggKeys:["junk removal service call"]},{name:"Garage Door",icon:"🚪",fbKeys:["garage door repair","garage door service"],ggKeys:["garage door repair call"]},{name:"Gutters",icon:"🏚️",fbKeys:["gutter installation","gutter cleaning"],ggKeys:["gutter installation call"]}],Financial:[{name:"Debt Settlement",icon:"💳",fbKeys:["debt settlement","debt relief program"],ggKeys:["debt settlement call","debt relief help"]},{name:"Tax Relief",icon:"📋",fbKeys:["tax relief service","IRS tax debt"],ggKeys:["IRS tax debt relief call"]},{name:"Credit Repair",icon:"📈",fbKeys:["credit repair service","fix my credit"],ggKeys:["credit repair service call"]},{name:"Mortgage",icon:"🏦",fbKeys:["mortgage rates","home loan"],ggKeys:["mortgage rates call"]},{name:"Refinance",icon:"💰",fbKeys:["refinance mortgage","lower mortgage rate"],ggKeys:["refinance mortgage call"]},{name:"Personal Loans",icon:"💵",fbKeys:["personal loan","fast cash loan"],ggKeys:["personal loan fast approval call"]}],Insurance:[{name:"Auto Insurance",icon:"🚘",fbKeys:["auto insurance quote","cheap car insurance"],ggKeys:["auto insurance quote call"]},{name:"Home Insurance",icon:"🏡",fbKeys:["homeowners insurance","home insurance quote"],ggKeys:["homeowners insurance quote call"]},{name:"Life Insurance",icon:"❤️",fbKeys:["life insurance quote","term life insurance"],ggKeys:["life insurance quote call"]},{name:"Health Insurance",icon:"🏥",fbKeys:["health insurance plans","affordable health insurance"],ggKeys:["health insurance plans call"]},{name:"Medicare",icon:"💊",fbKeys:["Medicare plans","Medicare supplement"],ggKeys:["Medicare plans call"]},{name:"Final Expense",icon:"🕊️",fbKeys:["final expense insurance","burial insurance"],ggKeys:["final expense insurance call"]}],"Legal & Medical":[{name:"Personal Injury",icon:"⚖️",fbKeys:["personal injury lawyer","accident attorney"],ggKeys:["personal injury lawyer call"]},{name:"Drug Rehab",icon:"🩺",fbKeys:["drug rehab center","addiction treatment"],ggKeys:["drug rehab center call"]},{name:"Senior Care",icon:"👴",fbKeys:["senior care services","assisted living"],ggKeys:["senior care service call"]},{name:"DUI Attorney",icon:"🚦",fbKeys:["DUI lawyer","DUI attorney"],ggKeys:["DUI lawyer call now"]}]};
 
-// ═══════════════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════════════
-const FB_API = 'https://graph.facebook.com/v21.0/ads_archive';
-const FIELDS = [
-  'id','ad_creation_time','ad_delivery_start_time','ad_delivery_stop_time',
-  'ad_creative_bodies','ad_creative_link_captions','ad_creative_link_descriptions',
-  'ad_creative_link_titles','ad_snapshot_url','currency',
-  'impressions','page_id','page_name','publisher_platforms','spend',
-  'ad_creative_images','ad_creative_videos'
-].join(',');
+let activeTab='fb';
+let FB_TOKEN=localStorage.getItem('adspy_fb_token')||'';
+let GG_KEY=localStorage.getItem('adspy_gg_key')||'d5814f57944272d33f8c2932c0db3b8ab14a5ec7e9d2217f2bc1baec73e294f4';
+let GG_LOC=localStorage.getItem('adspy_gg_loc')||'';
+let allAds=[],afterCursors=[],currentCursor=null,currentPage=1;
+let currentKeyword=null,currentLabel=null,isLoading=false;
 
-let TOKEN = localStorage.getItem('fb_adspy_token') || 'EAAJseJzwrbkBRLkMrt0nmZCZAasI8PSJxa2hy3IvE0F5L8fJf8IazRtKh1aiFGWP9ugTH9P8ZCNZAEBrHrqlRdqmxkC0H0Y9a7rJ4piNvbQb8gHE3n2BVZC041o8qewtuaJfSZAdCVIcZAFx27ZCADGGwnTs0MRjSK7udcriMJqZB5TEmBGz7eVllYAPbkwv3S3WgUdlZBV6aSbcMyGtDT2yfzNK5tZBMacP4WOMUeGAIsjOjhzJpDcWrIx';
-let allAds = [];
-let afterCursors = [];
-let currentCursor = null;
-let currentPage = 1;
-let currentKeyword = null;
-let currentLabel = null;
-let activeVertical = null;
-let isLoading = false;
+const FB_API='https://graph.facebook.com/v21.0/ads_archive';
+const SERP_API='https://serpapi.com/search.json';
+const FB_FIELDS='id,ad_creation_time,ad_delivery_start_time,ad_delivery_stop_time,ad_creative_bodies,ad_creative_link_captions,ad_creative_link_descriptions,ad_creative_link_titles,ad_snapshot_url,currency,impressions,page_id,page_name,publisher_platforms,spend,ad_creative_images,ad_creative_videos';
 
-// ═══════════════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════════════
-window.onload = () => {
-  buildSidebar();
-  verifyToken();
-};
+window.onload=()=>{buildSidebar();switchTab('fb')};
 
-function buildSidebar() {
-  const sb = document.getElementById('sidebar');
-  sb.innerHTML = '';
-  Object.entries(VERTICALS).forEach(([cat, items]) => {
-    const lbl = document.createElement('div');
-    lbl.className = 'cat-label';
-    lbl.textContent = cat;
-    sb.appendChild(lbl);
+function switchTab(tab){
+  activeTab=tab;const isFb=tab==='fb';
+  document.getElementById('tabFb').className='tab-btn'+(isFb?' active-fb':'');
+  document.getElementById('tabGg').className='tab-btn'+(!isFb?' active-gg':'');
+  document.getElementById('searchBtn').className='search-btn '+(isFb?'fb-btn':'gg-btn');
+  document.getElementById('fDevice').style.display=isFb?'none':'';
+  document.getElementById('fLimit').style.display=isFb?'':'none';
+  document.getElementById('rhCount').className='val '+(isFb?'val-fb':'val-gg');
+  document.getElementById('rhUniq').className='val '+(isFb?'val-fb':'val-gg');
+  document.querySelectorAll('.vertical-btn').forEach(b=>b.classList.remove('active-fb','active-gg'));
+  clearResults();verifyKey();
+}
 
-    items.forEach(v => {
-      const btn = document.createElement('button');
-      btn.className = 'vertical-btn';
-      btn.id = 'v_' + v.name.replace(/\s+/g,'_');
-      btn.innerHTML = `<span class="vicon">${v.icon}</span><span class="vname">${v.name}</span>`;
-      btn.onclick = () => selectVertical(v);
-      sb.appendChild(btn);
+function clearResults(){
+  allAds=[];afterCursors=[];currentCursor=null;currentPage=1;currentKeyword=null;currentLabel=null;
+  document.getElementById('adGrid').innerHTML=`<div class="state-wrap"><div class="state-icon">${activeTab==='fb'?'📘':'🔍'}</div><div class="state-title">${activeTab==='fb'?'Facebook Ad Library':'Google Ads Intelligence'}</div><div class="state-sub">Select a vertical or type a keyword to start spying.</div></div>`;
+  document.getElementById('resultsHeader').classList.add('hidden');
+  document.getElementById('pagination').classList.add('hidden');
+}
+
+function buildSidebar(){
+  const sb=document.getElementById('sidebar');sb.innerHTML='';
+  Object.entries(VERTICALS).forEach(([cat,items])=>{
+    const l=document.createElement('div');l.className='cat-label';l.textContent=cat;sb.appendChild(l);
+    items.forEach(v=>{
+      const b=document.createElement('button');b.className='vertical-btn';b.id='v_'+v.name.replace(/\W+/g,'_');
+      b.innerHTML=`<span class="vicon">${v.icon}</span><span>${v.name}</span>`;
+      b.onclick=()=>selectVertical(v);sb.appendChild(b);
     });
-
-    const div = document.createElement('div');
-    div.className = 'sidebar-divider';
-    sb.appendChild(div);
+    const d=document.createElement('div');d.className='sidebar-divider';sb.appendChild(d);
   });
 }
 
-function selectVertical(v) {
-  // clear active
-  document.querySelectorAll('.vertical-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('v_' + v.name.replace(/\s+/g,'_'));
-  if (btn) btn.classList.add('active');
-
-  activeVertical = v;
-  document.getElementById('searchInput').value = v.keys[0];
-  resetPages();
-  fetchAds(v.keys[0], v.name);
+function selectVertical(v){
+  document.querySelectorAll('.vertical-btn').forEach(b=>b.classList.remove('active-fb','active-gg'));
+  const btn=document.getElementById('v_'+v.name.replace(/\W+/g,'_'));
+  if(btn)btn.classList.add(activeTab==='fb'?'active-fb':'active-gg');
+  const kw=activeTab==='fb'?v.fbKeys[0]:v.ggKeys[0];
+  document.getElementById('searchInput').value=kw;
+  afterCursors=[];currentCursor=null;currentPage=1;
+  if(activeTab==='fb')fetchFb(kw,v.name);else fetchGg(kw,v.name);
 }
 
-// ═══════════════════════════════════════════════════════
-//  SEARCH
-// ═══════════════════════════════════════════════════════
-function doSearch() {
-  const kw = document.getElementById('searchInput').value.trim();
-  if (!kw) return;
-  document.querySelectorAll('.vertical-btn').forEach(b => b.classList.remove('active'));
-  activeVertical = null;
-  resetPages();
-  fetchAds(kw, kw);
+function doSearch(){
+  const kw=document.getElementById('searchInput').value.trim();if(!kw)return;
+  document.querySelectorAll('.vertical-btn').forEach(b=>b.classList.remove('active-fb','active-gg'));
+  afterCursors=[];currentCursor=null;currentPage=1;
+  if(activeTab==='fb')fetchFb(kw,kw);else fetchGg(kw,kw);
 }
 
-function resetPages() {
-  afterCursors = [];
-  currentCursor = null;
-  currentPage = 1;
-  allAds = [];
+async function fetchFb(keyword,label,after=null){
+  if(isLoading)return;if(!FB_TOKEN){openCfg();return;}
+  isLoading=true;currentKeyword=keyword;currentLabel=label;showLoading(keyword,'fb');
+  const country=document.getElementById('fCountry').value.toUpperCase();
+  const limit=document.getElementById('fLimit').value;
+  const params=new URLSearchParams({access_token:FB_TOKEN,ad_type:'ALL',ad_reached_countries:JSON.stringify([country]),search_terms:keyword,fields:FB_FIELDS,limit:limit});
+  if(after)params.append('after',after);
+  try{
+    const res=await fetch(`${FB_API}?${params}`);const data=await res.json();
+    if(data.error){showErr(data.error.message);return;}
+    allAds=data.data||[];currentCursor=data.paging?.cursors?.after||null;
+    renderFb(allAds,label,keyword);updatePag();
+  }catch(e){showErr('Network error: '+e.message);}finally{isLoading=false;}
 }
 
-async function fetchAds(keyword, label, after = null) {
-  if (isLoading) return;
-  if (!TOKEN) { openCfg(); return; }
-  isLoading = true;
-  currentKeyword = keyword;
-  currentLabel = label;
-
-  showLoading(keyword);
-
-  const country = document.getElementById('fCountry').value;
-  const limit = document.getElementById('fLimit').value;
-
-  const params = new URLSearchParams({
-    access_token: TOKEN,
-    ad_type: 'ALL',
-    ad_reached_countries: JSON.stringify([country]),
-    search_terms: keyword,
-    fields: FIELDS,
-    limit: limit,
-  });
-  if (after) params.append('after', after);
-
-  try {
-    const res = await fetch(`${FB_API}?${params}`);
-    const data = await res.json();
-
-    if (data.error) {
-      showErr(data.error.message);
-      return;
-    }
-
-    allAds = data.data || [];
-    currentCursor = data.paging?.cursors?.after || null;
-
-    renderAds(allAds, label, keyword, country);
-    updatePagination();
-
-  } catch(e) {
-    showErr('Network error: ' + e.message);
-  } finally {
-    isLoading = false;
-  }
+async function fetchGg(keyword,label){
+  if(isLoading)return;if(!GG_KEY){openCfg();return;}
+  isLoading=true;currentKeyword=keyword;currentLabel=label;showLoading(keyword,'gg');
+  const country=document.getElementById('fCountry').value;
+  const device=document.getElementById('fDevice').value;
+  const params=new URLSearchParams({engine:'google',q:keyword,api_key:GG_KEY,gl:country,hl:'en',device:device,num:'100'});
+  if(GG_LOC)params.append('location',GG_LOC);
+  try{
+    const res=await fetch(`${SERP_API}?${params}`);const data=await res.json();
+    if(data.error){showErr(data.error);return;}
+    const top=(data.ads||[]).map(a=>({...a,_pos:'top'}));
+    const bot=(data.bottom_ads||[]).map(a=>({...a,_pos:'bottom'}));
+    allAds=[...top,...bot];renderGg(allAds,label,keyword);
+    document.getElementById('pagination').classList.add('hidden');
+  }catch(e){showErr('Network error: '+e.message);}finally{isLoading=false;}
 }
 
-// ═══════════════════════════════════════════════════════
-//  RENDER
-// ═══════════════════════════════════════════════════════
-function renderAds(ads, label, kw, country) {
-  const grid = document.getElementById('adGrid');
-  const rh = document.getElementById('resultsHeader');
-  rh.style.display = 'flex';
-
-  document.getElementById('rhTitle').textContent = label;
-  document.getElementById('rhSub').textContent = `"${kw}" · ${country} · Page ${currentPage}`;
-  document.getElementById('rhCount').textContent = ads.length;
-  document.getElementById('rhPages').textContent = new Set(ads.map(a=>a.page_id)).size;
-
-  grid.innerHTML = '';
-
-  if (!ads.length) {
-    grid.innerHTML = `<div class="state-wrap">
-      <div class="state-icon">📭</div>
-      <div class="state-title">No ads found</div>
-      <div class="state-sub">Try a different keyword or country filter.</div>
-    </div>`;
-    return;
-  }
-
-  sortedAds(ads).forEach((ad, i) => {
-    const card = makeCard(ad, i);
-    grid.appendChild(card);
-  });
+function renderFb(ads,label,kw){
+  updateHdr(label,`"${kw}" · Facebook · ${document.getElementById('fCountry').value.toUpperCase()}`,ads.length,new Set(ads.map(a=>a.page_id)).size);
+  const grid=document.getElementById('adGrid');grid.innerHTML='';
+  if(!ads.length){grid.innerHTML=emptyHtml('No Facebook ads found for this keyword.');return;}
+  sortAds(ads).forEach((ad,i)=>grid.appendChild(makeFbCard(ad,i)));
 }
 
-function sortedAds(ads) {
-  const s = document.getElementById('sortSel').value;
-  return [...ads].sort((a,b) => {
-    if (s === 'newest') return new Date(b.ad_creation_time||0) - new Date(a.ad_creation_time||0);
-    if (s === 'oldest') return new Date(a.ad_creation_time||0) - new Date(b.ad_creation_time||0);
-    if (s === 'spend_high') {
-      const sa = parseInt(a.spend?.upper_bound||0);
-      const sb = parseInt(b.spend?.upper_bound||0);
-      return sb - sa;
-    }
-    return 0;
-  });
+function renderGg(ads,label,kw){
+  const domains=new Set(ads.map(a=>xDomain(a.displayed_link||a.link||'')));
+  updateHdr(label,`"${kw}" · Google · ${document.getElementById('fCountry').value.toUpperCase()} · ${document.getElementById('fDevice').value}`,ads.length,domains.size);
+  const grid=document.getElementById('adGrid');grid.innerHTML='';
+  if(!ads.length){grid.innerHTML=emptyHtml('No Google Ads found for this keyword right now.');return;}
+  sortAds(ads).forEach((ad,i)=>grid.appendChild(makeGgCard(ad,i)));
 }
 
-function reSort() {
-  if (allAds.length) renderAds(allAds, currentLabel, currentKeyword, document.getElementById('fCountry').value);
-}
-
-function makeCard(ad, i) {
-  const card = document.createElement('div');
-  card.className = 'ad-card';
-  card.style.animationDelay = `${i * 0.03}s`;
-
-  // platforms
-  const platMap = {facebook:'fb',instagram:'ig',audience_network:'an',messenger:'ms'};
-  const plats = (ad.publisher_platforms||[]).map(p =>
-    `<span class="plat ${platMap[p]||''}">${p==='audience_network'?'AN':p==='messenger'?'MSG':p.charAt(0).toUpperCase()+p.slice(1)}</span>`
-  ).join('');
-
-  // text
-  const title = (ad.ad_creative_link_titles||[])[0] || '';
-  const body  = (ad.ad_creative_bodies||[])[0] || '';
-  const desc  = (ad.ad_creative_link_descriptions||[])[0] || '';
-  const domain= (ad.ad_creative_link_captions||[])[0] || '';
-
-  // spend / impressions
-  const spMin = ad.spend?.lower_bound;
-  const spMax = ad.spend?.upper_bound;
-  const imMin = ad.impressions?.lower_bound;
-  const imMax = ad.impressions?.upper_bound;
-
-  const spendChip = spMin!=null
-    ? `<span class="chip spend">💵 $${fmtN(spMin)}–$${fmtN(spMax||spMin)}</span>` : '';
-  const impChip = imMin!=null
-    ? `<span class="chip imp">👁 ${fmtN(imMin)}–${fmtN(imMax||imMin)}</span>` : '';
-  const dateChip = ad.ad_creation_time
-    ? `<span class="chip date">📅 ${fmtDate(ad.ad_creation_time)}</span>` : '';
-  const activeChip = ad.ad_delivery_stop_time
-    ? `<span class="chip inactive">● STOPPED ${fmtDate(ad.ad_delivery_stop_time)}</span>`
-    : `<span class="chip active">● ACTIVE</span>`;
-
-  // domain row
-  const domainRow = domain
-    ? `<div class="domain-row">
-        <span class="domain-lbl">DOMAIN</span>
-        <span class="domain-val">${esc(domain)}</span>
-       </div>` : '';
-
-  // creative
-  const { html: creativeHtml, hasMedia, dlUrl, dlType } = getCreative(ad);
-
-  const dlBtn = hasMedia && dlType === 'image'
-    ? `<a class="c-btn" href="${dlUrl}" download target="_blank">⬇ IMG</a>`
-    : hasMedia && dlType === 'video'
-    ? `<a class="c-btn" href="${dlUrl}" target="_blank">▶ VID</a>` : '';
-
-  const creativeBlock = `
-    <div class="card-creative" id="cr_${ad.id}">
-      ${creativeHtml}
-      <div class="creative-overlay">${dlBtn}</div>
-    </div>`;
-
-  card.innerHTML = `
-    <div class="card-head">
-      <div class="page-info">
-        <div class="page-name" title="${esc(ad.page_name||'')}">${esc(ad.page_name||'Unknown Page')}</div>
-        <div class="page-id">Page ID: ${ad.page_id||'—'}</div>
-      </div>
-      <div class="card-platforms">${plats}</div>
-    </div>
-
-    ${creativeBlock}
-
+function makeFbCard(ad,i){
+  const card=document.createElement('div');card.className='ad-card fb-card';card.style.animationDelay=`${i*.03}s`;
+  const plats=(ad.publisher_platforms||[]).map(p=>{const m={facebook:'fb',instagram:'ig',audience_network:'an'};const l=p==='audience_network'?'AN':p.charAt(0).toUpperCase()+p.slice(1);return`<span class="plat ${m[p]||''}">${l}</span>`;}).join('');
+  const title=(ad.ad_creative_link_titles||[])[0]||'';
+  const body=(ad.ad_creative_bodies||[])[0]||'';
+  const domain=(ad.ad_creative_link_captions||[])[0]||'';
+  const spMin=ad.spend?.lower_bound,spMax=ad.spend?.upper_bound;
+  const imMin=ad.impressions?.lower_bound,imMax=ad.impressions?.upper_bound;
+  const sc=spMin!=null?`<span class="chip spend">💵 $${fN(spMin)}–$${fN(spMax||spMin)}</span>`:'';
+  const ic=imMin!=null?`<span class="chip imp">👁 ${fN(imMin)}–${fN(imMax||imMin)}</span>`:'';
+  const dc=ad.ad_creation_time?`<span class="chip date">📅 ${fD(ad.ad_creation_time)}</span>`:'';
+  const ac=ad.ad_delivery_stop_time?`<span class="chip inactive-chip">● STOPPED</span>`:`<span class="chip active-chip">● ACTIVE</span>`;
+  const dr=domain?`<div class="url-row"><span class="url-lbl">DOMAIN</span><span class="url-val fb-url">${esc(domain)}</span></div>`:'';
+  const {html:ch,dlUrl,dlType}=getFbC(ad);
+  const db=dlType==='image'?`<a class="c-btn" href="${dlUrl}" download target="_blank">⬇ IMG</a>`:dlType==='video'?`<a class="c-btn" href="${dlUrl}" target="_blank">▶ VID</a>`:'';
+  card.innerHTML=`
+    <div class="card-head"><div class="page-info"><div class="page-name">${esc(ad.page_name||'Unknown')}</div><div class="page-sub">ID: ${ad.page_id||'—'}</div></div><div class="card-badges">${plats}</div></div>
+    ${ch?`<div class="card-creative" id="cr_${ad.id}">${ch}<div class="creative-overlay">${db}</div></div>`:''}
     <div class="card-body">
-      ${title ? `<div class="ad-title">${esc(title)}</div>` : ''}
-      ${body  ? `<div class="ad-body" id="ab_${ad.id}">${esc(body)}</div>
-                 <button class="expand-txt" onclick="expText('${ad.id}')">▼ show more</button>` : ''}
-      ${desc  ? `<div style="font-size:10px;color:var(--text3);margin-bottom:8px;font-style:italic">${esc(desc)}</div>` : ''}
-      ${!title && !body ? `<div style="font-size:11px;color:var(--text3);margin-bottom:8px;opacity:.5">No ad copy available</div>` : ''}
-
-      ${domainRow}
-
-      <div class="chips">
-        ${activeChip}
-        ${spendChip}
-        ${impChip}
-        ${dateChip}
-      </div>
+      ${title?`<div class="ad-title-fb">${esc(title)}</div>`:''}
+      ${body?`<div class="ad-body-text" id="ab_${ad.id}">${esc(body)}</div><button class="expand-txt" onclick="expT('ab_${ad.id}',this)">▼ more</button>`:''}
+      ${!title&&!body?`<div style="font-size:11px;color:var(--text3);opacity:.5;margin-bottom:8px">No ad copy</div>`:''}
+      ${dr}<div class="chips">${ac}${sc}${ic}${dc}</div>
     </div>
-
     <div class="card-foot">
-      ${creativeHtml ? `<button class="foot-btn green" onclick="toggleCreative('${ad.id}')">👁 PREVIEW</button>` : ''}
-      <a class="foot-btn ${creativeHtml?'':'ml'}" href="${ad.ad_snapshot_url||'#'}" target="_blank" rel="noopener">🔗 SNAPSHOT</a>
-      <a class="foot-btn ml" href="https://www.facebook.com/${ad.page_id}" target="_blank" rel="noopener">📄 PAGE</a>
+      ${ch?`<button class="foot-btn" onclick="togC('cr_${ad.id}')">👁 PREVIEW</button>`:''}
+      <a class="foot-btn ml" href="${esc(ad.ad_snapshot_url||'#')}" target="_blank">🔗 SNAPSHOT</a>
+      <a class="foot-btn" href="https://www.facebook.com/${ad.page_id}" target="_blank">📄 PAGE</a>
     </div>`;
-
   return card;
 }
 
-function getCreative(ad) {
-  const imgs = ad.ad_creative_images;
-  if (imgs && imgs.length) {
-    const src = imgs[0].original_image_url || imgs[0].url || '';
-    if (src) return {
-      html: `<img src="${src}" alt="creative" loading="lazy" onerror="this.parentElement.style.display='none'">`,
-      hasMedia: true, dlUrl: src, dlType: 'image'
-    };
-  }
-  const vids = ad.ad_creative_videos;
-  if (vids && vids.length) {
-    const src = vids[0].video_hd_url || vids[0].video_sd_url || '';
-    const poster = vids[0].video_preview_image_url || '';
-    if (src) return {
-      html: `<video src="${src}" controls playsinline preload="none" poster="${poster}"></video>`,
-      hasMedia: true, dlUrl: src, dlType: 'video'
-    };
-  }
-  if (ad.ad_snapshot_url) return {
-    html: `<iframe class="creative-iframe" src="${ad.ad_snapshot_url}" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe>`,
-    hasMedia: true, dlUrl: ad.ad_snapshot_url, dlType: 'snapshot'
-  };
-  return { html:'', hasMedia:false, dlUrl:'', dlType:'' };
-}
-
-// ═══════════════════════════════════════════════════════
-//  UI HELPERS
-// ═══════════════════════════════════════════════════════
-function toggleCreative(id) {
-  const el = document.getElementById('cr_' + id);
-  if (el) el.classList.toggle('visible');
-}
-function expText(id) {
-  const el = document.getElementById('ab_' + id);
-  const btn = el?.nextElementSibling;
-  if (!el) return;
-  const exp = el.classList.toggle('exp');
-  if (btn) btn.textContent = exp ? '▲ show less' : '▼ show more';
-}
-
-function showLoading(kw) {
-  document.getElementById('adGrid').innerHTML = `
-    <div class="state-wrap">
-      <div class="spinner"></div>
-      <div class="loading-kw">Scanning: "${kw}"...</div>
+function makeGgCard(ad,i){
+  const card=document.createElement('div');card.className='ad-card gg-card';card.style.animationDelay=`${i*.03}s`;
+  const domain=xDomain(ad.displayed_link||ad.link||'');
+  const isTop=ad._pos==='top';
+  const lu=ad.link||'';
+  const sl=(ad.sitelinks||[]).slice(0,4).map(s=>`<span class="sitelink">${esc(s.title||'')}</span>`).join('');
+  const hasCall=(ad.extensions||[]).some(e=>/\d{3}[-.\s]\d{3}[-.\s]\d{4}|\(\d{3}\)/.test(e));
+  const ur=lu?`<div class="url-row" onclick="cpUrl('${esc(lu)}')"><span class="url-lbl">LANDING URL</span><span class="url-val gg-url" title="${esc(lu)}">${esc(lu)}</span><button class="copy-btn">⎘</button></div>`:'';
+  card.innerHTML=`
+    <div class="card-head"><div class="page-info"><div class="page-name">${esc(domain||'Unknown')}</div><div class="page-sub gg-sub">${esc(ad.displayed_link||'')}</div></div><span class="pos-badge ${isTop?'top':'bot'}">${isTop?'▲ TOP':'▼ BOT'}</span></div>
+    <div class="card-body">
+      ${ad.title?`<div class="ad-headline">${esc(ad.title)}</div>`:''}
+      ${ad.description?`<div class="ad-body-text" id="gd_${i}">${esc(ad.description)}</div><button class="expand-txt" onclick="expT('gd_${i}',this)">▼ more</button>`:''}
+      ${sl?`<div class="sitelinks">${sl}</div>`:''}
+      ${ur}
+      <div class="chips"><span class="chip ${isTop?'pos-top':'pos-bot'}">${isTop?'▲ TOP':'▼ BOT'}</span>${hasCall?`<span class="chip call">📞 CALL EXT</span>`:''}${ad.rating?`<span class="chip rating">⭐ ${ad.rating}</span>`:''}</div>
+    </div>
+    <div class="card-foot">
+      ${lu?`<a class="foot-btn" href="${esc(lu)}" target="_blank">🌐 VISIT</a>`:''}
+      <a class="foot-btn ml" href="https://www.google.com/search?q=${encodeURIComponent(currentKeyword||'')}" target="_blank">🔍 SERP</a>
     </div>`;
-  document.getElementById('pagination').classList.add('hidden');
-  document.getElementById('resultsHeader').style.display = 'none';
+  return card;
 }
 
-function showErr(msg) {
-  isLoading = false;
-  document.getElementById('adGrid').innerHTML = `
-    <div class="err-box">⚠ API ERROR: ${esc(msg)}<br>
-    <small>Check your access token in CONFIG settings.</small></div>`;
+function getFbC(ad){
+  const imgs=ad.ad_creative_images;
+  if(imgs?.length){const src=imgs[0].original_image_url||imgs[0].url||'';if(src)return{html:`<img src="${src}" loading="lazy" onerror="this.parentElement.style.display='none'">`,dlUrl:src,dlType:'image'};}
+  const vids=ad.ad_creative_videos;
+  if(vids?.length){const src=vids[0].video_hd_url||vids[0].video_sd_url||'';if(src)return{html:`<video src="${src}" controls playsinline preload="none" poster="${vids[0].video_preview_image_url||''}"></video>`,dlUrl:src,dlType:'video'};}
+  if(ad.ad_snapshot_url)return{html:`<iframe class="creative-iframe" src="${ad.ad_snapshot_url}" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe>`,dlUrl:ad.ad_snapshot_url,dlType:'snapshot'};
+  return{html:'',dlUrl:'',dlType:''};
 }
 
-// ═══════════════════════════════════════════════════════
-//  PAGINATION
-// ═══════════════════════════════════════════════════════
-function goPage(dir) {
-  if (!currentKeyword) return;
-  if (dir === 'next' && currentCursor) {
-    afterCursors.push(currentCursor);
-    currentPage++;
-    fetchAds(currentKeyword, currentLabel, currentCursor);
-  } else if (dir === 'prev' && currentPage > 1) {
-    afterCursors.pop();
-    currentPage--;
-    const cur = afterCursors.length ? afterCursors[afterCursors.length-1] : null;
-    fetchAds(currentKeyword, currentLabel, cur);
+function goPage(dir){
+  if(!currentKeyword||activeTab!=='fb')return;
+  if(dir==='next'&&currentCursor){afterCursors.push(currentCursor);currentPage++;fetchFb(currentKeyword,currentLabel,currentCursor);}
+  else if(dir==='prev'&&currentPage>1){afterCursors.pop();currentPage--;fetchFb(currentKeyword,currentLabel,afterCursors.length?afterCursors[afterCursors.length-1]:null);}
+}
+function updatePag(){
+  const pag=document.getElementById('pagination');
+  if(activeTab!=='fb'){pag.classList.add('hidden');return;}
+  pag.classList.remove('hidden');
+  document.getElementById('pgInfo').textContent=`Page ${currentPage}`;
+  document.getElementById('pgPrev').disabled=currentPage<=1;
+  document.getElementById('pgNext').disabled=!currentCursor;
+}
+
+function updateHdr(title,sub,count,uniq){
+  document.getElementById('resultsHeader').classList.remove('hidden');
+  document.getElementById('rhTitle').textContent=title;
+  document.getElementById('rhSub').textContent=sub;
+  document.getElementById('rhCount').textContent=count;
+  document.getElementById('rhUniq').textContent=uniq;
+}
+function sortAds(ads){
+  const s=document.getElementById('sortSel').value;
+  if(s==='newest')return[...ads].sort((a,b)=>new Date(b.ad_creation_time||0)-new Date(a.ad_creation_time||0));
+  if(s==='alpha')return[...ads].sort((a,b)=>(a.title||a.page_name||'').localeCompare(b.title||b.page_name||''));
+  return ads;
+}
+function reSort(){if(allAds.length){if(activeTab==='fb')renderFb(allAds,currentLabel,currentKeyword);else renderGg(allAds,currentLabel,currentKeyword);}}
+function togC(id){const el=document.getElementById(id);if(el)el.classList.toggle('visible');}
+function expT(id,btn){const el=document.getElementById(id);if(!el)return;const e=el.classList.toggle('exp');btn.textContent=e?'▲ less':'▼ more';}
+function cpUrl(url){navigator.clipboard.writeText(url).then(()=>{const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);});}
+function showLoading(kw,tab){document.getElementById('adGrid').innerHTML=`<div class="state-wrap"><div class="spinner ${tab}-spin"></div><div class="loading-kw">Scanning: "${kw}"...</div></div>`;document.getElementById('resultsHeader').classList.add('hidden');document.getElementById('pagination').classList.add('hidden');}
+function showErr(msg){isLoading=false;document.getElementById('adGrid').innerHTML=`<div class="err-box">⚠ ERROR: ${esc(msg)}<br><small>Check API config in ⚙ CONFIG.</small></div>`;}
+function emptyHtml(msg){return`<div class="state-wrap"><div class="state-icon">📭</div><div class="state-title">No ads found</div><div class="state-sub">${msg}</div></div>`;}
+
+function openCfg(){
+  if(activeTab==='fb'){document.getElementById('cfgFbToken').value=FB_TOKEN||'';document.getElementById('fbModal').classList.remove('hidden');}
+  else{document.getElementById('cfgGgKey').value=GG_KEY||'';document.getElementById('cfgGgLoc').value=GG_LOC||'';document.getElementById('ggModal').classList.remove('hidden');}
+}
+function closeCfg(){document.getElementById('fbModal').classList.add('hidden');document.getElementById('ggModal').classList.add('hidden');}
+function saveFbCfg(){const t=document.getElementById('cfgFbToken').value.trim();if(t){FB_TOKEN=t;localStorage.setItem('adspy_fb_token',t);}closeCfg();verifyKey();}
+function saveGgCfg(){const k=document.getElementById('cfgGgKey').value.trim();const l=document.getElementById('cfgGgLoc').value.trim();if(k){GG_KEY=k;localStorage.setItem('adspy_gg_key',k);}GG_LOC=l;localStorage.setItem('adspy_gg_loc',l);closeCfg();verifyKey();}
+function verifyKey(){
+  const badge=document.getElementById('apiBadge');badge.className='api-badge checking';badge.textContent='● CHECKING...';
+  if(activeTab==='fb'){
+    if(!FB_TOKEN){badge.className='api-badge err';badge.textContent='● NO TOKEN';return;}
+    fetch(`https://graph.facebook.com/v21.0/me?access_token=${FB_TOKEN}`).then(r=>r.json()).then(d=>{
+      if(d.error){badge.className='api-badge err';badge.textContent='● INVALID TOKEN';}
+      else{badge.className='api-badge ok';badge.textContent='● FB TOKEN OK';}
+    }).catch(()=>{badge.className='api-badge err';badge.textContent='● CHECK FAILED';});
+  }else{
+    if(!GG_KEY){badge.className='api-badge err';badge.textContent='● NO API KEY';return;}
+    fetch(`https://serpapi.com/account.json?api_key=${GG_KEY}`).then(r=>r.json()).then(d=>{
+      if(d.error){badge.className='api-badge err';badge.textContent='● INVALID KEY';}
+      else{badge.className='api-badge ok';badge.textContent=`● SERP OK · ${d.plan_searches_left||'?'} left`;}
+    }).catch(()=>{badge.className='api-badge ok';badge.textContent='● SERP KEY LOADED';});
   }
 }
-function updatePagination() {
-  const pag = document.getElementById('pagination');
-  pag.classList.remove('hidden');
-  document.getElementById('pgInfo').textContent = `Page ${currentPage}`;
-  document.getElementById('pgPrev').disabled = currentPage <= 1;
-  document.getElementById('pgNext').disabled = !currentCursor;
-}
 
-// ═══════════════════════════════════════════════════════
-//  TOKEN
-// ═══════════════════════════════════════════════════════
-function verifyToken() {
-  const badge = document.getElementById('tokenBadge');
-  badge.className = 'token-badge checking';
-  badge.textContent = '● CHECKING...';
-  if (!TOKEN) { badge.className='token-badge err'; badge.textContent='● NO TOKEN'; return; }
-  fetch(`https://graph.facebook.com/v21.0/me?access_token=${TOKEN}`)
-    .then(r=>r.json())
-    .then(d => {
-      if (d.error) { badge.className='token-badge err'; badge.textContent='● INVALID TOKEN'; }
-      else { badge.className='token-badge ok'; badge.textContent='● TOKEN OK'; }
-    })
-    .catch(() => { badge.className='token-badge err'; badge.textContent='● CHECK FAILED'; });
-}
-
-// ═══════════════════════════════════════════════════════
-//  CONFIG
-// ═══════════════════════════════════════════════════════
-function openCfg() { document.getElementById('cfgToken').value=TOKEN||''; document.getElementById('cfgModal').classList.remove('hidden'); }
-function closeCfg() { document.getElementById('cfgModal').classList.add('hidden'); }
-function saveCfg() {
-  const t = document.getElementById('cfgToken').value.trim();
-  if (t) { TOKEN=t; localStorage.setItem('fb_adspy_token',t); }
-  closeCfg(); verifyToken();
-}
-
-// ═══════════════════════════════════════════════════════
-//  UTILS
-// ═══════════════════════════════════════════════════════
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function fmtDate(s){ return new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
-function fmtN(n){
-  const x=parseInt(n||0);
-  if(x>=1000000) return (x/1000000).toFixed(1)+'M';
-  if(x>=1000) return (x/1000).toFixed(0)+'K';
-  return x.toString();
-}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fD(s){return new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function fN(n){const x=parseInt(n||0);if(x>=1000000)return(x/1000000).toFixed(1)+'M';if(x>=1000)return(x/1000).toFixed(0)+'K';return x.toString();}
+function xDomain(url){try{return new URL(url.startsWith('http')?url:'https://'+url).hostname.replace('www.','');}catch{return url.split('/')[0].replace('www.','');}}
 </script>
 </body>
 </html>
