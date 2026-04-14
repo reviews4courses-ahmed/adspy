@@ -5,21 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AdSpy — Pay-Per-Call Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg:#07090c;--s1:#0c0f14;--s2:#111620;--border:#1d2535;--border2:#243040;
-  --green:#00e5a0;--green-dim:rgba(0,229,160,.12);--green-glow:rgba(0,229,160,.06);
-  --blue:#3d8ef8;--blue-dim:rgba(61,142,248,.12);
-  --yellow:#f5a623;--yellow-dim:rgba(245,166,35,.12);
-  --red:#ff4d6a;--red-dim:rgba(255,77,106,.1);
-  --orange:#ff6b35;--fb:#1877f2;
+:root{
+  --bg:#07090c;--s1:#0c0f14;--s2:#111620;--s3:#161d28;
+  --border:#1d2535;--border2:#243040;
+  --green:#00e5a0;--gdim:rgba(0,229,160,.12);
+  --blue:#3d8ef8;--bdim:rgba(61,142,248,.12);
+  --yellow:#f5a623;--ydim:rgba(245,166,35,.12);
+  --red:#ff4d6a;--rdim:rgba(255,77,106,.1);
+  --purple:#a78bfa;--pdim:rgba(167,139,250,.1);
+  --orange:#ff6b35;--odim:rgba(255,107,53,.1);
+  --fb:#1877f2;
   --text:#dce8f5;--text2:#8a9bb5;--text3:#4a5a70;
   --mono:'IBM Plex Mono',monospace;--sans:'Inter',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex;flex-direction:column}
-.topbar{height:52px;min-height:52px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:0;z-index:100}
+
+/* ── TOPBAR ── */
+.topbar{height:52px;min-height:52px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:0;z-index:100;flex-shrink:0}
 .logo{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green);letter-spacing:.06em;display:flex;align-items:center;gap:8px;flex-shrink:0;margin-right:20px}
 .logo-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
@@ -27,7 +33,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 .tab-btn{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;padding:0 20px;height:42px;border:none;cursor:pointer;background:transparent;color:var(--text3);border-bottom:2px solid transparent;display:flex;align-items:center;gap:7px;transition:all .15s}
 .tab-btn.active-fb{color:var(--fb);border-bottom-color:var(--fb)}
 .tab-btn.active-gg{color:var(--orange);border-bottom-color:var(--orange)}
-.top-search{flex:1;max-width:480px;display:flex;align-items:center;background:var(--s2);border:1px solid var(--border2);border-radius:8px;overflow:hidden}
+.top-search{flex:1;max-width:500px;display:flex;align-items:center;background:var(--s2);border:1px solid var(--border2);border-radius:8px;overflow:hidden}
 .top-search input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 14px}
 .top-search input::placeholder{color:var(--text3)}
 .search-btn{border:none;color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;padding:9px 16px;cursor:pointer;transition:opacity .15s;flex-shrink:0}
@@ -36,11 +42,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 .filter-sel{background:var(--s2);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:6px;outline:none;cursor:pointer;appearance:none}
 .cfg-btn{background:var(--s2);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .15s}
 .api-badge{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:20px;flex-shrink:0;letter-spacing:.04em}
-.api-badge.ok{background:var(--green-dim);border:1px solid rgba(0,229,160,.25);color:var(--green)}
-.api-badge.err{background:var(--red-dim);border:1px solid rgba(255,77,106,.25);color:var(--red)}
+.api-badge.ok{background:var(--gdim);border:1px solid rgba(0,229,160,.25);color:var(--green)}
+.api-badge.err{background:var(--rdim);border:1px solid rgba(255,77,106,.25);color:var(--red)}
 .api-badge.checking{background:rgba(90,112,128,.12);border:1px solid var(--border2);color:var(--text3)}
+
+/* ── BODY ── */
 .body{display:flex;flex:1;overflow:hidden}
-.sidebar{width:225px;min-width:225px;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0}
+
+/* ── SIDEBAR ── */
+.sidebar{width:220px;min-width:220px;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;flex-shrink:0}
 .sidebar::-webkit-scrollbar{width:4px}.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 .cat-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--text3);text-transform:uppercase;padding:12px 16px 6px}
 .vertical-btn{width:100%;background:transparent;border:none;text-align:left;cursor:pointer;padding:7px 16px;display:flex;align-items:center;gap:10px;color:var(--text2);font-family:var(--sans);font-size:12px;font-weight:500;transition:all .12s;border-left:2px solid transparent}
@@ -49,7 +59,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 .vertical-btn.active-gg{background:rgba(255,107,53,.06);color:var(--orange);border-left-color:var(--orange)}
 .vicon{font-size:14px;flex-shrink:0;width:18px;text-align:center}
 .sidebar-divider{height:1px;background:var(--border);margin:8px 0}
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── FACEBOOK MAIN ── */
+.fb-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .results-header{padding:13px 20px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-shrink:0}
 .rh-title{font-size:14px;font-weight:700;color:var(--text)}
 .rh-sub{font-family:var(--mono);font-size:11px;color:var(--text3)}
@@ -60,59 +72,54 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 .sort-sel{background:var(--s2);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:10px;padding:5px 8px;border-radius:5px;outline:none;cursor:pointer;appearance:none}
 .grid-wrap{flex:1;overflow-y:auto;padding:16px 20px}
 .grid-wrap::-webkit-scrollbar{width:5px}.grid-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-.ad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.ad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+
+/* ── FB AD CARD ── */
 .ad-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .18s,box-shadow .18s;animation:cardIn .25s ease both;display:flex;flex-direction:column}
 .ad-card.fb-card:hover{border-color:rgba(24,119,242,.3);box-shadow:0 4px 20px rgba(0,0,0,.3)}
-.ad-card.gg-card:hover{border-color:rgba(255,107,53,.3);box-shadow:0 4px 20px rgba(0,0,0,.3)}
 @keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .card-head{padding:12px 14px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border)}
 .page-info{flex:1;min-width:0}
 .page-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.page-sub{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.page-sub.gg-sub{color:var(--orange)}
+.page-sub{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:2px}
 .card-badges{display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
 .plat{font-family:var(--mono);font-size:8px;letter-spacing:.04em;padding:2px 6px;border-radius:3px;text-transform:uppercase}
 .plat.fb{background:rgba(24,119,242,.15);border:1px solid rgba(24,119,242,.3);color:#4d94ff}
 .plat.ig{background:rgba(193,53,132,.12);border:1px solid rgba(193,53,132,.25);color:#e1699a}
-.plat.an{background:var(--yellow-dim);border:1px solid rgba(245,166,35,.2);color:var(--yellow)}
-.pos-badge{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px}
-.pos-badge.top{background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.25);color:var(--orange)}
-.pos-badge.bot{background:rgba(90,112,128,.12);border:1px solid var(--border2);color:var(--text3)}
+.plat.an{background:var(--ydim);border:1px solid rgba(245,166,35,.2);color:var(--yellow)}
 .card-creative{position:relative;background:var(--s2);display:none;border-bottom:1px solid var(--border)}
 .card-creative.visible{display:block}
 .card-creative img{width:100%;max-height:200px;object-fit:cover;display:block}
-.card-creative video{width:100%;max-height:200px;object-fit:cover;display:block}
+.card-creative video{width:100%;max-height:200px;display:block}
 .creative-iframe{width:100%;height:200px;border:none;display:block;background:#fff}
 .creative-overlay{position:absolute;top:8px;right:8px;display:flex;gap:5px}
-.c-btn{background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:5px;padding:4px 8px;font-family:var(--mono);font-size:9px;cursor:pointer;text-decoration:none;transition:all .12s}
+.c-btn{background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:5px;padding:4px 8px;font-family:var(--mono);font-size:9px;cursor:pointer;text-decoration:none}
 .card-body{padding:12px 14px;flex:1}
-.ad-headline{font-size:13px;font-weight:600;color:var(--blue);line-height:1.4;margin-bottom:6px}
 .ad-title-fb{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.4}
 .ad-body-text{font-size:11px;color:var(--text2);line-height:1.6;max-height:68px;overflow:hidden;margin-bottom:6px}
 .ad-body-text.exp{max-height:none}
 .expand-txt{background:none;border:none;color:var(--blue);font-family:var(--mono);font-size:9px;cursor:pointer;padding:0;margin-bottom:8px;display:block}
-.sitelinks{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
-.sitelink{font-family:var(--mono);font-size:9px;background:var(--s2);border:1px solid var(--border2);color:var(--blue);padding:2px 8px;border-radius:4px;white-space:nowrap;overflow:hidden;max-width:140px;text-overflow:ellipsis}
-.url-row{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:6px 9px;margin-bottom:8px;cursor:pointer;transition:border-color .12s}
-.url-row:hover{border-color:var(--text2)}
+.url-row{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:6px 9px;margin-bottom:8px;cursor:pointer}
 .url-lbl{font-family:var(--mono);font-size:8px;color:var(--text3);flex-shrink:0}
 .url-val{font-family:var(--mono);font-size:9px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .url-val.fb-url{color:var(--fb)}.url-val.gg-url{color:var(--orange)}
 .copy-btn{font-family:var(--mono);font-size:8px;color:var(--text3);background:none;border:none;cursor:pointer;flex-shrink:0}
 .chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
 .chip{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:4px;display:flex;align-items:center;gap:3px}
-.chip.spend{background:var(--yellow-dim);border:1px solid rgba(245,166,35,.25);color:var(--yellow)}
-.chip.imp{background:var(--green-dim);border:1px solid rgba(0,229,160,.2);color:var(--green)}
+.chip.spend{background:var(--ydim);border:1px solid rgba(245,166,35,.25);color:var(--yellow)}
+.chip.imp{background:var(--gdim);border:1px solid rgba(0,229,160,.2);color:var(--green)}
 .chip.date{background:rgba(90,112,128,.1);border:1px solid var(--border2);color:var(--text3)}
-.chip.active-chip{background:var(--green-dim);border:1px solid rgba(0,229,160,.2);color:var(--green)}
-.chip.inactive-chip{background:var(--red-dim);border:1px solid rgba(255,77,106,.2);color:var(--red)}
-.chip.pos-top{background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.2);color:var(--orange)}
-.chip.pos-bot{background:rgba(90,112,128,.1);border:1px solid var(--border2);color:var(--text3)}
-.chip.call{background:var(--green-dim);border:1px solid rgba(0,229,160,.2);color:var(--green)}
-.chip.rating{background:var(--yellow-dim);border:1px solid rgba(245,166,35,.2);color:var(--yellow)}
+.chip.active-chip{background:var(--gdim);border:1px solid rgba(0,229,160,.2);color:var(--green)}
+.chip.inactive-chip{background:var(--rdim);border:1px solid rgba(255,77,106,.2);color:var(--red)}
 .card-foot{padding:9px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .foot-btn{font-family:var(--mono);font-size:9px;padding:5px 10px;border-radius:5px;cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);text-decoration:none}
 .foot-btn:hover{border-color:var(--text);color:var(--text)}.foot-btn.ml{margin-left:auto}
+.pagination{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 0;border-top:1px solid var(--border);margin-top:8px}
+.pg-btn{background:var(--s1);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:10px;padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .12s}
+.pg-btn:hover:not(:disabled){border-color:var(--text);color:var(--text)}.pg-btn:disabled{opacity:.3;cursor:not-allowed}
+.pg-info{font-family:var(--mono);font-size:10px;color:var(--text3)}
+
+/* ── STATES ── */
 .state-wrap{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 40px;gap:14px;text-align:center}
 .state-icon{font-size:42px;opacity:.25}.state-title{font-size:15px;font-weight:600;color:var(--text2)}
 .state-sub{font-family:var(--mono);font-size:11px;color:var(--text3);line-height:1.7}
@@ -120,11 +127,130 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 .spinner.fb-spin{border-top-color:var(--fb)}.spinner.gg-spin{border-top-color:var(--orange)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-kw{font-family:var(--mono);font-size:12px;color:var(--text3)}
-.err-box{grid-column:1/-1;background:var(--red-dim);border:1px solid rgba(255,77,106,.3);color:var(--red);padding:14px 18px;border-radius:8px;font-family:var(--mono);font-size:11px;line-height:1.7}
-.pagination{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 0;border-top:1px solid var(--border);margin-top:8px}
-.pg-btn{background:var(--s1);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:10px;padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .12s}
-.pg-btn:hover:not(:disabled){border-color:var(--text);color:var(--text)}.pg-btn:disabled{opacity:.3;cursor:not-allowed}
-.pg-info{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.err-box{background:var(--rdim);border:1px solid rgba(255,77,106,.3);color:var(--red);padding:14px 18px;border-radius:8px;font-family:var(--mono);font-size:11px;line-height:1.7;margin:20px}
+
+/* ════════════════════════════════════
+   GOOGLE ADS INTELLIGENCE TAB
+   ════════════════════════════════════ */
+.gg-main{flex:1;display:flex;overflow:hidden}
+
+/* GG left panel */
+.gg-left{width:320px;min-width:320px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--s1)}
+.gg-panel-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.gg-ptab{flex:1;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px 6px;border:none;background:transparent;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s}
+.gg-ptab.active{color:var(--orange);border-bottom-color:var(--orange)}
+.gg-panel{flex:1;overflow-y:auto;padding:14px}
+.gg-panel::-webkit-scrollbar{width:4px}.gg-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* GG right panel */
+.gg-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* GG sub-tabs */
+.gg-subtabs{display:flex;background:var(--s1);border-bottom:1px solid var(--border);padding:0 20px;flex-shrink:0}
+.gg-stab{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.07em;padding:12px 16px;border:none;background:transparent;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s}
+.gg-stab.active{color:var(--orange);border-bottom-color:var(--orange)}
+
+.gg-content{flex:1;overflow-y:auto;padding:20px}
+.gg-content::-webkit-scrollbar{width:5px}.gg-content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* Validation score card */
+.validation-card{background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:20px;margin-bottom:16px}
+.vc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.vc-keyword{font-size:16px;font-weight:700;color:var(--text)}
+.vc-score{font-family:var(--mono);font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px}
+.vc-score.high{background:var(--gdim);border:1px solid rgba(0,229,160,.3);color:var(--green)}
+.vc-score.medium{background:var(--ydim);border:1px solid rgba(245,166,35,.3);color:var(--yellow)}
+.vc-score.low{background:var(--rdim);border:1px solid rgba(255,77,106,.3);color:var(--red)}
+.vc-stats{display:flex;gap:16px}
+.vc-stat{text-align:center}
+.vc-stat-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--orange)}
+.vc-stat-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+
+/* Ad result cards */
+.gg-ad-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;animation:cardIn .2s ease both;transition:border-color .15s}
+.gg-ad-card:hover{border-color:rgba(255,107,53,.3)}
+.gg-ad-card.paid{border-left:3px solid var(--orange)}
+.gg-ad-card.organic{border-left:3px solid var(--blue)}
+.gg-ad-type{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.gg-ad-type.paid-lbl{color:var(--orange)}
+.gg-ad-type.organic-lbl{color:var(--blue)}
+.gg-ad-pos{font-family:var(--mono);font-size:8px;color:var(--text3);margin-left:auto}
+.gg-ad-headline{font-size:13px;font-weight:600;color:var(--blue);line-height:1.4;margin-bottom:5px}
+.gg-ad-url{font-family:var(--mono);font-size:9px;color:var(--orange);margin-bottom:6px;display:flex;align-items:center;gap:6px;cursor:pointer}
+.gg-ad-desc{font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:8px}
+.gg-ad-foot{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.intent-tag{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:3px;text-transform:uppercase}
+.intent-tag.high{background:var(--gdim);border:1px solid rgba(0,229,160,.3);color:var(--green)}
+.intent-tag.medium{background:var(--ydim);border:1px solid rgba(245,166,35,.3);color:var(--yellow)}
+.intent-tag.low{background:rgba(90,112,128,.1);border:1px solid var(--border2);color:var(--text3)}
+.angle-tag{font-family:var(--mono);font-size:8px;padding:2px 8px;border-radius:3px}
+.angle-tag.discount{background:var(--gdim);border:1px solid rgba(0,229,160,.2);color:var(--green)}
+.angle-tag.urgency{background:var(--rdim);border:1px solid rgba(255,77,106,.2);color:var(--red)}
+.angle-tag.support{background:var(--bdim);border:1px solid rgba(61,142,248,.2);color:var(--blue)}
+.angle-tag.brand{background:var(--pdim);border:1px solid rgba(167,139,250,.2);color:var(--purple)}
+.sitelinks-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.sitelink-chip{font-family:var(--mono);font-size:8px;background:var(--s1);border:1px solid var(--border2);color:var(--text2);padding:2px 7px;border-radius:3px}
+.call-ext{font-family:var(--mono);font-size:9px;color:var(--green);display:flex;align-items:center;gap:4px;margin-top:4px}
+
+/* Intelligence panel */
+.intel-section{margin-bottom:20px}
+.intel-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.intel-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.angle-group{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
+.angle-group-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.angle-group-name{font-size:12px;font-weight:600;color:var(--text)}
+.angle-count{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.angle-examples{display:flex;flex-wrap:wrap;gap:4px}
+.angle-ex{font-family:var(--mono);font-size:9px;background:var(--s1);border:1px solid var(--border2);color:var(--text2);padding:3px 8px;border-radius:4px}
+.word-freq-item{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.word-freq-word{font-family:var(--mono);font-size:10px;color:var(--text);flex-shrink:0;width:120px}
+.word-freq-bar{flex:1;height:6px;background:var(--border2);border-radius:3px;overflow:hidden}
+.word-freq-fill{height:100%;background:var(--orange);border-radius:3px;transition:width .4s}
+.word-freq-count{font-family:var(--mono);font-size:9px;color:var(--text3);flex-shrink:0;width:24px;text-align:right}
+
+/* Keyword expansion */
+.kw-chip{display:inline-flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;margin:0 4px 6px 0;cursor:pointer;transition:all .12s;font-size:11px;color:var(--text2)}
+.kw-chip:hover{border-color:var(--orange);color:var(--orange)}
+.kw-chip .kw-intent{font-family:var(--mono);font-size:8px;margin-left:4px}
+
+/* Charts */
+.chart-wrap{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
+.chart-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px}
+.chart-canvas{width:100%!important;max-height:180px}
+
+/* History & Favorites */
+.hist-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s2);border:1px solid var(--border);border-radius:6px;margin-bottom:5px;cursor:pointer;transition:border-color .12s}
+.hist-item:hover{border-color:var(--orange)}
+.hist-kw{font-size:12px;color:var(--text);flex:1}
+.hist-time{font-family:var(--mono);font-size:9px;color:var(--text3)}
+.hist-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;padding:0}
+.hist-del:hover{color:var(--red)}
+.fav-btn{background:none;border:none;cursor:pointer;font-size:13px;padding:0;transition:transform .15s}
+.fav-btn:hover{transform:scale(1.2)}
+
+/* Geo */
+.geo-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px}
+.geo-flag{font-size:16px;flex-shrink:0}
+.geo-country{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.geo-count{font-family:var(--mono);font-size:10px;color:var(--orange)}
+.geo-bar{flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-left:8px}
+.geo-fill{height:100%;background:var(--orange);border-radius:2px}
+
+/* Left panel sections */
+.lp-section{margin-bottom:16px}
+.lp-title{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.lp-stat{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.lp-stat-lbl{font-size:11px;color:var(--text2)}
+.lp-stat-val{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--orange)}
+.lp-stat-val.green{color:var(--green)}.lp-stat-val.red{color:var(--red)}.lp-stat-val.blue{color:var(--blue)}
+
+/* Advertiser repeat */
+.repeat-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--s2);border:1px solid var(--border);border-radius:6px;margin-bottom:5px}
+.repeat-domain{font-size:11px;color:var(--text);flex:1;font-weight:500}
+.repeat-count{font-family:var(--mono);font-size:10px;color:var(--orange)}
+.repeat-badge{font-family:var(--mono);font-size:8px;padding:1px 6px;border-radius:3px;background:var(--odim);border:1px solid rgba(255,107,53,.2);color:var(--orange)}
+
+/* ── MODALS ── */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
 .modal{background:var(--s2);border:1px solid var(--border2);border-radius:14px;padding:28px;width:500px;max-width:95vw;box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .modal h3{font-family:var(--mono);font-size:13px;letter-spacing:.08em;margin-bottom:6px}
@@ -138,13 +264,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 .btn-cancel{background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:7px;padding:8px 16px;font-family:var(--mono);font-size:10px;cursor:pointer}
 .btn-save{border:none;color:#fff;border-radius:7px;padding:8px 16px;font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer}
 .btn-save.fb-save{background:var(--fb)}.btn-save.gg-save{background:var(--orange)}
+
+/* toast */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#000;font-family:var(--mono);font-size:11px;font-weight:700;padding:8px 16px;border-radius:8px;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
 .hidden{display:none!important}
+.empty-msg{font-family:var(--mono);font-size:11px;color:var(--text3);text-align:center;padding:20px;line-height:1.7}
 </style>
 </head>
 <body>
 
+<!-- TOPBAR -->
 <div class="topbar">
   <div class="logo"><div class="logo-dot"></div>ADSPY</div>
   <div class="tabs">
@@ -152,7 +282,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
     <button class="tab-btn" id="tabGg" onclick="switchTab('gg')">🔍 GOOGLE ADS</button>
   </div>
   <div class="top-search">
-    <input type="text" id="searchInput" placeholder="Search any pay-per-call keyword..." onkeydown="if(event.key==='Enter')doSearch()">
+    <input type="text" id="searchInput" placeholder="Search pay-per-call keyword..." onkeydown="if(event.key==='Enter')doSearch()">
     <button class="search-btn fb-btn" id="searchBtn" onclick="doSearch()">SEARCH</button>
   </div>
   <div class="top-filters">
@@ -175,17 +305,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
   </div>
 </div>
 
+<!-- BODY -->
 <div class="body">
   <div class="sidebar" id="sidebar"></div>
-  <div class="main">
-    <div class="results-header hidden" id="resultsHeader">
+
+  <!-- FACEBOOK PANEL -->
+  <div class="fb-main hidden" id="fbPanel">
+    <div class="results-header hidden" id="fbResultsHeader">
       <div>
-        <div class="rh-title" id="rhTitle">—</div>
-        <div class="rh-sub" id="rhSub"></div>
+        <div class="rh-title" id="fbRhTitle">—</div>
+        <div class="rh-sub" id="fbRhSub"></div>
       </div>
       <div class="rh-stats">
-        <div class="rh-stat"><span class="val val-fb" id="rhCount">0</span><span class="lbl">ads</span></div>
-        <div class="rh-stat"><span class="val val-fb" id="rhUniq">0</span><span class="lbl">advertisers</span></div>
+        <div class="rh-stat"><span class="val val-fb" id="fbRhCount">0</span><span class="lbl">ads</span></div>
+        <div class="rh-stat"><span class="val val-fb" id="fbRhUniq">0</span><span class="lbl">advertisers</span></div>
       </div>
       <select class="sort-sel" id="sortSel" onchange="reSort()">
         <option value="default">Default</option>
@@ -194,22 +327,106 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
       </select>
     </div>
     <div class="grid-wrap">
-      <div class="ad-grid" id="adGrid">
-        <div class="state-wrap">
-          <div class="state-icon">🕵️</div>
-          <div class="state-title">Pay-Per-Call Ad Intelligence</div>
-          <div class="state-sub">Select a vertical from the sidebar<br>or type any keyword to start spying.</div>
-        </div>
+      <div class="ad-grid" id="fbAdGrid">
+        <div class="state-wrap"><div class="state-icon">📘</div><div class="state-title">Facebook Ad Library</div><div class="state-sub">Select a vertical or type a keyword.</div></div>
       </div>
-      <div class="pagination hidden" id="pagination">
+      <div class="pagination hidden" id="fbPagination">
         <button class="pg-btn" id="pgPrev" onclick="goPage('prev')" disabled>← PREV</button>
         <span class="pg-info" id="pgInfo">Page 1</span>
         <button class="pg-btn" id="pgNext" onclick="goPage('next')">NEXT →</button>
       </div>
     </div>
   </div>
+
+  <!-- GOOGLE ADS PANEL -->
+  <div class="gg-main hidden" id="ggPanel">
+
+    <!-- LEFT: Stats + History + Favorites -->
+    <div class="gg-left">
+      <div class="gg-panel-tabs">
+        <button class="gg-ptab active" onclick="switchLPanel('stats')" id="lp-stats">STATS</button>
+        <button class="gg-ptab" onclick="switchLPanel('history')" id="lp-history">HISTORY</button>
+        <button class="gg-ptab" onclick="switchLPanel('favorites')" id="lp-favorites">★ SAVED</button>
+      </div>
+
+      <!-- Stats panel -->
+      <div class="gg-panel" id="lpStats">
+        <div class="lp-section">
+          <div class="lp-title">Offer Validation</div>
+          <div id="validationScore">
+            <div class="empty-msg">Run a search to see<br>validation score</div>
+          </div>
+        </div>
+        <div class="lp-section">
+          <div class="lp-title">Search Stats</div>
+          <div id="searchStats">
+            <div class="lp-stat"><span class="lp-stat-lbl">Paid Ads</span><span class="lp-stat-val" id="statPaid">—</span></div>
+            <div class="lp-stat"><span class="lp-stat-lbl">Organic Results</span><span class="lp-stat-val blue" id="statOrganic">—</span></div>
+            <div class="lp-stat"><span class="lp-stat-lbl">Advertisers</span><span class="lp-stat-val" id="statAdvertisers">—</span></div>
+            <div class="lp-stat"><span class="lp-stat-lbl">Intent Level</span><span class="lp-stat-val green" id="statIntent">—</span></div>
+          </div>
+        </div>
+        <div class="lp-section">
+          <div class="lp-title">Top Advertisers</div>
+          <div id="topAdvertisers"><div class="empty-msg">No data yet</div></div>
+        </div>
+        <div class="chart-wrap" id="intentChartWrap" style="display:none">
+          <div class="chart-title">AD ANGLE DISTRIBUTION</div>
+          <canvas class="chart-canvas" id="angleChart"></canvas>
+        </div>
+      </div>
+
+      <!-- History panel -->
+      <div class="gg-panel hidden" id="lpHistory">
+        <div class="lp-title" style="margin-bottom:10px">SEARCH HISTORY</div>
+        <div id="historyList"><div class="empty-msg">No search history yet</div></div>
+        <button onclick="clearHistory()" style="width:100%;margin-top:10px;padding:7px;background:transparent;border:1px solid var(--border2);color:var(--text3);font-family:var(--mono);font-size:10px;border-radius:6px;cursor:pointer">CLEAR ALL</button>
+      </div>
+
+      <!-- Favorites panel -->
+      <div class="gg-panel hidden" id="lpFavorites">
+        <div class="lp-title" style="margin-bottom:10px">SAVED KEYWORDS</div>
+        <div id="favoritesList"><div class="empty-msg">No saved keywords.<br>Click ★ on any keyword to save.</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Main results -->
+    <div class="gg-right">
+      <div class="gg-subtabs">
+        <button class="gg-stab active" onclick="switchGgTab('ads')" id="gt-ads">ADS RESULTS</button>
+        <button class="gg-stab" onclick="switchGgTab('intel')" id="gt-intel">AD INTELLIGENCE</button>
+        <button class="gg-stab" onclick="switchGgTab('keywords')" id="gt-keywords">KEYWORD EXPANSION</button>
+        <button class="gg-stab" onclick="switchGgTab('geo')" id="gt-geo">GEO ANALYSIS</button>
+      </div>
+
+      <!-- ADS RESULTS -->
+      <div class="gg-content" id="gc-ads">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;text-align:center">
+          <div style="font-size:42px;opacity:.2">🔍</div>
+          <div style="font-size:15px;font-weight:600;color:var(--text2)">Google Ads Intelligence</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);line-height:1.8">Select a vertical from the sidebar<br>or type any keyword to start spying.<br><br>Shows paid ads + organic results<br>with intent tagging and angle detection.</div>
+        </div>
+      </div>
+
+      <!-- AD INTELLIGENCE -->
+      <div class="gg-content hidden" id="gc-intel">
+        <div class="empty-msg" style="margin-top:60px">Run a search first to see ad intelligence.</div>
+      </div>
+
+      <!-- KEYWORD EXPANSION -->
+      <div class="gg-content hidden" id="gc-keywords">
+        <div class="empty-msg" style="margin-top:60px">Run a search first to see keyword expansion.</div>
+      </div>
+
+      <!-- GEO ANALYSIS -->
+      <div class="gg-content hidden" id="gc-geo">
+        <div class="empty-msg" style="margin-top:60px">Run a search first to see geo analysis.</div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- FB CONFIG MODAL -->
 <div class="modal-bg hidden" id="fbModal">
   <div class="modal">
     <h3 class="fb-h">// FACEBOOK CONFIG</h3>
@@ -224,6 +441,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
   </div>
 </div>
 
+<!-- GG CONFIG MODAL -->
 <div class="modal-bg hidden" id="ggModal">
   <div class="modal">
     <h3 class="gg-h">// GOOGLE ADS CONFIG</h3>
@@ -243,21 +461,34 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 <div class="toast" id="toast">✓ Copied!</div>
 
 <script>
-const VERTICALS={Travel:[{name:"Flight Booking",icon:"✈️",fbKeys:["book flight","airline booking","cheap flights"],ggKeys:["book flight cheap","airline booking phone number"]},{name:"Delta Air Lines",icon:"✈️",fbKeys:["book delta flight","delta airlines","delta reservations"],ggKeys:["book delta flight","delta airlines reservations phone"]},{name:"Train Booking",icon:"🚂",fbKeys:["train ticket booking","amtrak booking"],ggKeys:["book amtrak train","train ticket booking phone"]},{name:"Hotel Booking",icon:"🏨",fbKeys:["hotel booking","book hotel","cheap hotels"],ggKeys:["book hotel by phone","cheap hotel deals call"]},{name:"Car Rental",icon:"🚗",fbKeys:["car rental","rent a car"],ggKeys:["car rental near me call"]},{name:"Cruise Booking",icon:"🚢",fbKeys:["cruise booking","cruise deals"],ggKeys:["cruise deals call now"]}],"Home Services":[{name:"HVAC",icon:"❄️",fbKeys:["HVAC repair","AC repair service"],ggKeys:["HVAC repair near me","emergency HVAC call"]},{name:"Plumbing",icon:"🔧",fbKeys:["plumber near me","plumbing service"],ggKeys:["plumber near me call","emergency plumber"]},{name:"Roofing",icon:"🏠",fbKeys:["roofing contractor","roof repair"],ggKeys:["roofing contractor near me","roof repair call"]},{name:"Electrical",icon:"⚡",fbKeys:["electrician near me","electrical repair"],ggKeys:["electrician near me call"]},{name:"Pest Control",icon:"🐛",fbKeys:["pest control service","exterminator near me"],ggKeys:["pest control near me call"]},{name:"Lawn Care",icon:"🌿",fbKeys:["lawn care service","lawn mowing near me"],ggKeys:["lawn care service near me call"]},{name:"Tree Service",icon:"🌳",fbKeys:["tree removal service","tree trimming"],ggKeys:["tree removal service call"]},{name:"Water Damage",icon:"💧",fbKeys:["water damage restoration","flood cleanup"],ggKeys:["water damage restoration call"]},{name:"Mold Remediation",icon:"🦠",fbKeys:["mold removal service","mold remediation"],ggKeys:["mold removal service call"]},{name:"Fire Damage",icon:"🔥",fbKeys:["fire damage restoration","smoke damage"],ggKeys:["fire damage restoration call"]},{name:"Foundation Repair",icon:"🏗️",fbKeys:["foundation repair","basement waterproofing"],ggKeys:["foundation repair near me call"]},{name:"Windows & Doors",icon:"🪟",fbKeys:["window replacement","door replacement"],ggKeys:["window replacement service call"]},{name:"Solar",icon:"☀️",fbKeys:["solar panel installation","go solar"],ggKeys:["solar panel installation call"]},{name:"Home Security",icon:"🔐",fbKeys:["home security system","security alarm"],ggKeys:["home security system call"]},{name:"Moving Services",icon:"📦",fbKeys:["moving company","movers near me"],ggKeys:["moving company near me call"]},{name:"Junk Removal",icon:"🗑️",fbKeys:["junk removal service"],ggKeys:["junk removal service call"]},{name:"Garage Door",icon:"🚪",fbKeys:["garage door repair","garage door service"],ggKeys:["garage door repair call"]},{name:"Gutters",icon:"🏚️",fbKeys:["gutter installation","gutter cleaning"],ggKeys:["gutter installation call"]}],Financial:[{name:"Debt Settlement",icon:"💳",fbKeys:["debt settlement","debt relief program"],ggKeys:["debt settlement call","debt relief help"]},{name:"Tax Relief",icon:"📋",fbKeys:["tax relief service","IRS tax debt"],ggKeys:["IRS tax debt relief call"]},{name:"Credit Repair",icon:"📈",fbKeys:["credit repair service","fix my credit"],ggKeys:["credit repair service call"]},{name:"Mortgage",icon:"🏦",fbKeys:["mortgage rates","home loan"],ggKeys:["mortgage rates call"]},{name:"Refinance",icon:"💰",fbKeys:["refinance mortgage","lower mortgage rate"],ggKeys:["refinance mortgage call"]},{name:"Personal Loans",icon:"💵",fbKeys:["personal loan","fast cash loan"],ggKeys:["personal loan fast approval call"]}],Insurance:[{name:"Auto Insurance",icon:"🚘",fbKeys:["auto insurance quote","cheap car insurance"],ggKeys:["auto insurance quote call"]},{name:"Home Insurance",icon:"🏡",fbKeys:["homeowners insurance","home insurance quote"],ggKeys:["homeowners insurance quote call"]},{name:"Life Insurance",icon:"❤️",fbKeys:["life insurance quote","term life insurance"],ggKeys:["life insurance quote call"]},{name:"Health Insurance",icon:"🏥",fbKeys:["health insurance plans","affordable health insurance"],ggKeys:["health insurance plans call"]},{name:"Medicare",icon:"💊",fbKeys:["Medicare plans","Medicare supplement"],ggKeys:["Medicare plans call"]},{name:"Final Expense",icon:"🕊️",fbKeys:["final expense insurance","burial insurance"],ggKeys:["final expense insurance call"]}],"Legal & Medical":[{name:"Personal Injury",icon:"⚖️",fbKeys:["personal injury lawyer","accident attorney"],ggKeys:["personal injury lawyer call"]},{name:"Drug Rehab",icon:"🩺",fbKeys:["drug rehab center","addiction treatment"],ggKeys:["drug rehab center call"]},{name:"Senior Care",icon:"👴",fbKeys:["senior care services","assisted living"],ggKeys:["senior care service call"]},{name:"DUI Attorney",icon:"🚦",fbKeys:["DUI lawyer","DUI attorney"],ggKeys:["DUI lawyer call now"]}]};
+// ═══════════════════════════════════════════
+//  VERTICALS
+// ═══════════════════════════════════════════
+const VERTICALS={Travel:[{name:"Flight Booking",icon:"✈️",fbKeys:["book flight","airline booking","cheap flights"],ggKeys:["book flight phone number","airline reservations call","cheap flights call now"]},{name:"Delta Air Lines",icon:"✈️",fbKeys:["book delta flight","delta airlines","delta reservations"],ggKeys:["delta airlines phone number","book delta flight","delta customer service call"]},{name:"Train Booking",icon:"🚂",fbKeys:["train ticket booking","amtrak booking"],ggKeys:["amtrak phone number","train booking call","book train ticket"]},{name:"Hotel Booking",icon:"🏨",fbKeys:["hotel booking","book hotel"],ggKeys:["hotel reservations phone","book hotel call","hotel deals call now"]},{name:"Car Rental",icon:"🚗",fbKeys:["car rental","rent a car"],ggKeys:["car rental phone number","rent a car call"]},{name:"Cruise Booking",icon:"🚢",fbKeys:["cruise booking","cruise deals"],ggKeys:["cruise reservations phone","book cruise call"]}],"Home Services":[{name:"HVAC",icon:"❄️",fbKeys:["HVAC repair","AC repair"],ggKeys:["HVAC repair call now","AC repair phone number","emergency HVAC service"]},{name:"Plumbing",icon:"🔧",fbKeys:["plumber near me","plumbing service"],ggKeys:["plumber phone number","emergency plumber call","plumbing service near me"]},{name:"Roofing",icon:"🏠",fbKeys:["roofing contractor","roof repair"],ggKeys:["roofing contractor call","roof repair phone number"]},{name:"Electrical",icon:"⚡",fbKeys:["electrician near me"],ggKeys:["electrician phone number","emergency electrician call"]},{name:"Pest Control",icon:"🐛",fbKeys:["pest control service"],ggKeys:["pest control phone number","exterminator call now"]},{name:"Lawn Care",icon:"🌿",fbKeys:["lawn care service","lawn mowing"],ggKeys:["lawn care phone number","lawn mowing service call"]},{name:"Tree Service",icon:"🌳",fbKeys:["tree removal service"],ggKeys:["tree service phone number","tree removal call"]},{name:"Water Damage",icon:"💧",fbKeys:["water damage restoration"],ggKeys:["water damage restoration call","flood cleanup phone number"]},{name:"Mold Remediation",icon:"🦠",fbKeys:["mold removal service"],ggKeys:["mold removal call now","mold remediation phone"]},{name:"Fire Damage",icon:"🔥",fbKeys:["fire damage restoration"],ggKeys:["fire damage restoration call"]},{name:"Foundation Repair",icon:"🏗️",fbKeys:["foundation repair"],ggKeys:["foundation repair call","basement waterproofing phone"]},{name:"Windows & Doors",icon:"🪟",fbKeys:["window replacement"],ggKeys:["window replacement call","door installation phone"]},{name:"Solar",icon:"☀️",fbKeys:["solar panel installation"],ggKeys:["solar installation call","home solar phone number"]},{name:"Home Security",icon:"🔐",fbKeys:["home security system"],ggKeys:["home security call now","alarm system phone number"]},{name:"Moving Services",icon:"📦",fbKeys:["moving company"],ggKeys:["moving company call","movers phone number"]},{name:"Junk Removal",icon:"🗑️",fbKeys:["junk removal service"],ggKeys:["junk removal call now","junk hauling phone"]},{name:"Garage Door",icon:"🚪",fbKeys:["garage door repair"],ggKeys:["garage door repair call","garage door phone number"]},{name:"Gutters",icon:"🏚️",fbKeys:["gutter installation"],ggKeys:["gutter installation call","gutter cleaning phone"]}],Financial:[{name:"Debt Settlement",icon:"💳",fbKeys:["debt settlement","debt relief"],ggKeys:["debt settlement call","debt relief phone number","get out of debt call"]},{name:"Tax Relief",icon:"📋",fbKeys:["tax relief","IRS tax debt"],ggKeys:["tax relief call now","IRS tax debt phone number"]},{name:"Credit Repair",icon:"📈",fbKeys:["credit repair"],ggKeys:["credit repair call now","fix credit phone number"]},{name:"Mortgage",icon:"🏦",fbKeys:["mortgage rates","home loan"],ggKeys:["mortgage rates call","home loan phone number"]},{name:"Refinance",icon:"💰",fbKeys:["refinance mortgage"],ggKeys:["refinance call now","mortgage refinance phone"]},{name:"Personal Loans",icon:"💵",fbKeys:["personal loan"],ggKeys:["personal loan call now","fast loan phone number"]}],Insurance:[{name:"Auto Insurance",icon:"🚘",fbKeys:["auto insurance quote"],ggKeys:["auto insurance call now","car insurance phone number","insurance quote call"]},{name:"Home Insurance",icon:"🏡",fbKeys:["homeowners insurance"],ggKeys:["home insurance call now","homeowners insurance phone"]},{name:"Life Insurance",icon:"❤️",fbKeys:["life insurance quote"],ggKeys:["life insurance call now","life insurance phone number"]},{name:"Health Insurance",icon:"🏥",fbKeys:["health insurance"],ggKeys:["health insurance call now","health plan phone number"]},{name:"Medicare",icon:"💊",fbKeys:["Medicare plans"],ggKeys:["Medicare call now","Medicare phone number","Medicare enrollment call"]},{name:"Final Expense",icon:"🕊️",fbKeys:["final expense insurance"],ggKeys:["final expense call now","burial insurance phone"]}],"Legal & Medical":[{name:"Personal Injury",icon:"⚖️",fbKeys:["personal injury lawyer"],ggKeys:["personal injury lawyer call","accident attorney phone number"]},{name:"Drug Rehab",icon:"🩺",fbKeys:["drug rehab center"],ggKeys:["rehab center call now","addiction help phone number"]},{name:"Senior Care",icon:"👴",fbKeys:["senior care services"],ggKeys:["senior care call now","home health phone number"]},{name:"DUI Attorney",icon:"🚦",fbKeys:["DUI lawyer"],ggKeys:["DUI lawyer call now","DUI attorney phone number"]}]};
 
-let activeTab='fb';
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let activeTab='fb', activeGgTab='ads', activeLPanel='stats';
 let FB_TOKEN=localStorage.getItem('adspy_fb_token')||'';
 let GG_KEY=localStorage.getItem('adspy_gg_key')||'d5814f57944272d33f8c2932c0db3b8ab14a5ec7e9d2217f2bc1baec73e294f4';
 let GG_LOC=localStorage.getItem('adspy_gg_loc')||'';
-let allAds=[],afterCursors=[],currentCursor=null,currentPage=1;
-let currentKeyword=null,currentLabel=null,isLoading=false;
+let fbAds=[],fbAfterCursors=[],fbCursor=null,fbPage=1;
+let currentKw=null,currentLabel=null,isLoading=false;
+let ggResultCache={};
+let angleChartInst=null;
 
 const FB_API='https://graph.facebook.com/v21.0/ads_archive';
-const SERP_API='/api/serp';
-const FB_FIELDS='id,ad_creation_time,ad_delivery_start_time,ad_delivery_stop_time,ad_creative_bodies,ad_creative_link_captions,ad_creative_link_descriptions,ad_creative_link_titles,ad_snapshot_url,currency,impressions,page_id,page_name,publisher_platforms,spend,ad_creative_images,ad_creative_videos';
+const FB_FIELDS='id,ad_creation_time,ad_delivery_stop_time,ad_creative_bodies,ad_creative_link_captions,ad_creative_link_titles,ad_snapshot_url,impressions,page_id,page_name,publisher_platforms,spend,ad_creative_images,ad_creative_videos';
 
-window.onload=()=>{buildSidebar();switchTab('fb')};
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+window.onload=()=>{buildSidebar();switchTab('fb');renderHistory();renderFavorites();};
 
+// ═══════════════════════════════════════════
+//  TAB SWITCH
+// ═══════════════════════════════════════════
 function switchTab(tab){
   activeTab=tab;const isFb=tab==='fb';
   document.getElementById('tabFb').className='tab-btn'+(isFb?' active-fb':'');
@@ -265,19 +496,31 @@ function switchTab(tab){
   document.getElementById('searchBtn').className='search-btn '+(isFb?'fb-btn':'gg-btn');
   document.getElementById('fDevice').style.display=isFb?'none':'';
   document.getElementById('fLimit').style.display=isFb?'':'none';
-  document.getElementById('rhCount').className='val '+(isFb?'val-fb':'val-gg');
-  document.getElementById('rhUniq').className='val '+(isFb?'val-fb':'val-gg');
+  document.getElementById('fbPanel').classList.toggle('hidden',!isFb);
+  document.getElementById('ggPanel').classList.toggle('hidden',isFb);
   document.querySelectorAll('.vertical-btn').forEach(b=>b.classList.remove('active-fb','active-gg'));
-  clearResults();verifyKey();
+  verifyKey();
 }
 
-function clearResults(){
-  allAds=[];afterCursors=[];currentCursor=null;currentPage=1;currentKeyword=null;currentLabel=null;
-  document.getElementById('adGrid').innerHTML=`<div class="state-wrap"><div class="state-icon">${activeTab==='fb'?'📘':'🔍'}</div><div class="state-title">${activeTab==='fb'?'Facebook Ad Library':'Google Ads Intelligence'}</div><div class="state-sub">Select a vertical or type a keyword to start spying.</div></div>`;
-  document.getElementById('resultsHeader').classList.add('hidden');
-  document.getElementById('pagination').classList.add('hidden');
+function switchGgTab(t){
+  activeGgTab=t;
+  ['ads','intel','keywords','geo'].forEach(x=>{
+    document.getElementById('gt-'+x).classList.toggle('active',x===t);
+    document.getElementById('gc-'+x).classList.toggle('hidden',x!==t);
+  });
 }
 
+function switchLPanel(p){
+  activeLPanel=p;
+  ['stats','history','favorites'].forEach(x=>{
+    document.getElementById('lp-'+x).classList.toggle('active',x===p);
+    document.getElementById('lp'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('hidden',x!==p);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  SIDEBAR
+// ═══════════════════════════════════════════
 function buildSidebar(){
   const sb=document.getElementById('sidebar');sb.innerHTML='';
   Object.entries(VERTICALS).forEach(([cat,items])=>{
@@ -297,78 +540,63 @@ function selectVertical(v){
   if(btn)btn.classList.add(activeTab==='fb'?'active-fb':'active-gg');
   const kw=activeTab==='fb'?v.fbKeys[0]:v.ggKeys[0];
   document.getElementById('searchInput').value=kw;
-  afterCursors=[];currentCursor=null;currentPage=1;
-  if(activeTab==='fb')fetchFb(kw,v.name);else fetchGg(kw,v.name);
+  if(activeTab==='fb'){fbAfterCursors=[];fbCursor=null;fbPage=1;fetchFb(kw,v.name);}
+  else fetchGg(kw,v.name);
 }
 
 function doSearch(){
   const kw=document.getElementById('searchInput').value.trim();if(!kw)return;
   document.querySelectorAll('.vertical-btn').forEach(b=>b.classList.remove('active-fb','active-gg'));
-  afterCursors=[];currentCursor=null;currentPage=1;
-  if(activeTab==='fb')fetchFb(kw,kw);else fetchGg(kw,kw);
+  if(activeTab==='fb'){fbAfterCursors=[];fbCursor=null;fbPage=1;fetchFb(kw,kw);}
+  else fetchGg(kw,kw);
 }
 
+// ═══════════════════════════════════════════
+//  FACEBOOK FETCH
+// ═══════════════════════════════════════════
 async function fetchFb(keyword,label,after=null){
   if(isLoading)return;if(!FB_TOKEN){openCfg();return;}
-  isLoading=true;currentKeyword=keyword;currentLabel=label;showLoading(keyword,'fb');
+  isLoading=true;currentKw=keyword;currentLabel=label;
+  showFbLoading(keyword);
   const country=document.getElementById('fCountry').value.toUpperCase();
   const limit=document.getElementById('fLimit').value;
   const params=new URLSearchParams({access_token:FB_TOKEN,ad_type:'ALL',ad_reached_countries:JSON.stringify([country]),search_terms:keyword,fields:FB_FIELDS,limit:limit});
   if(after)params.append('after',after);
   try{
     const res=await fetch(`${FB_API}?${params}`);const data=await res.json();
-    if(data.error){showErr(data.error.message);return;}
-    allAds=data.data||[];currentCursor=data.paging?.cursors?.after||null;
-    renderFb(allAds,label,keyword);updatePag();
-  }catch(e){showErr('Network error: '+e.message);}finally{isLoading=false;}
+    if(data.error){showFbErr(data.error.message);return;}
+    fbAds=data.data||[];fbCursor=data.paging?.cursors?.after||null;
+    renderFbAds(fbAds,label,keyword);updateFbPag();
+  }catch(e){showFbErr('Network error: '+e.message);}finally{isLoading=false;}
 }
 
-async function fetchGg(keyword,label){
-  if(isLoading)return;if(!GG_KEY){openCfg();return;}
-  isLoading=true;currentKeyword=keyword;currentLabel=label;showLoading(keyword,'gg');
-  const country=document.getElementById('fCountry').value;
-  const device=document.getElementById('fDevice').value;
-  const params=new URLSearchParams({engine:'google',q:keyword,api_key:GG_KEY,gl:country,hl:'en',device:device,num:'100'});
-  if(GG_LOC)params.append('location',GG_LOC);
-  try{
-    const res=await fetch(`${SERP_API}?${params}`);const data=await res.json();
-    if(data.error){showErr(data.error);return;}
-    const top=(data.ads||[]).map(a=>({...a,_pos:'top'}));
-    const bot=(data.bottom_ads||[]).map(a=>({...a,_pos:'bottom'}));
-    allAds=[...top,...bot];renderGg(allAds,label,keyword);
-    document.getElementById('pagination').classList.add('hidden');
-  }catch(e){showErr('Network error: '+e.message);}finally{isLoading=false;}
+function renderFbAds(ads,label,kw){
+  const rh=document.getElementById('fbResultsHeader');rh.classList.remove('hidden');
+  document.getElementById('fbRhTitle').textContent=label;
+  document.getElementById('fbRhSub').textContent=`"${kw}" · FB · ${document.getElementById('fCountry').value.toUpperCase()}`;
+  document.getElementById('fbRhCount').textContent=ads.length;
+  document.getElementById('fbRhUniq').textContent=new Set(ads.map(a=>a.page_id)).size;
+  const grid=document.getElementById('fbAdGrid');grid.innerHTML='';
+  if(!ads.length){grid.innerHTML=`<div class="state-wrap"><div class="state-icon">📭</div><div class="state-title">No ads found</div><div class="state-sub">Try a different keyword.</div></div>`;return;}
+  sortFbAds(ads).forEach((ad,i)=>grid.appendChild(makeFbCard(ad,i)));
 }
-
-function renderFb(ads,label,kw){
-  updateHdr(label,`"${kw}" · Facebook · ${document.getElementById('fCountry').value.toUpperCase()}`,ads.length,new Set(ads.map(a=>a.page_id)).size);
-  const grid=document.getElementById('adGrid');grid.innerHTML='';
-  if(!ads.length){grid.innerHTML=emptyHtml('No Facebook ads found for this keyword.');return;}
-  sortAds(ads).forEach((ad,i)=>grid.appendChild(makeFbCard(ad,i)));
+function sortFbAds(ads){
+  const s=document.getElementById('sortSel').value;
+  if(s==='newest')return[...ads].sort((a,b)=>new Date(b.ad_creation_time||0)-new Date(a.ad_creation_time||0));
+  if(s==='alpha')return[...ads].sort((a,b)=>(a.page_name||'').localeCompare(b.page_name||''));
+  return ads;
 }
-
-function renderGg(ads,label,kw){
-  const domains=new Set(ads.map(a=>xDomain(a.displayed_link||a.link||'')));
-  updateHdr(label,`"${kw}" · Google · ${document.getElementById('fCountry').value.toUpperCase()} · ${document.getElementById('fDevice').value}`,ads.length,domains.size);
-  const grid=document.getElementById('adGrid');grid.innerHTML='';
-  if(!ads.length){grid.innerHTML=emptyHtml('No Google Ads found for this keyword right now.');return;}
-  sortAds(ads).forEach((ad,i)=>grid.appendChild(makeGgCard(ad,i)));
-}
+function reSort(){if(fbAds.length)renderFbAds(fbAds,currentLabel,currentKw);}
 
 function makeFbCard(ad,i){
   const card=document.createElement('div');card.className='ad-card fb-card';card.style.animationDelay=`${i*.03}s`;
-  const plats=(ad.publisher_platforms||[]).map(p=>{const m={facebook:'fb',instagram:'ig',audience_network:'an'};const l=p==='audience_network'?'AN':p.charAt(0).toUpperCase()+p.slice(1);return`<span class="plat ${m[p]||''}">${l}</span>`;}).join('');
+  const plats=(ad.publisher_platforms||[]).map(p=>{const m={facebook:'fb',instagram:'ig',audience_network:'an'};return`<span class="plat ${m[p]||''}">${p==='audience_network'?'AN':p.charAt(0).toUpperCase()+p.slice(1)}</span>`;}).join('');
   const title=(ad.ad_creative_link_titles||[])[0]||'';
   const body=(ad.ad_creative_bodies||[])[0]||'';
   const domain=(ad.ad_creative_link_captions||[])[0]||'';
   const spMin=ad.spend?.lower_bound,spMax=ad.spend?.upper_bound;
   const imMin=ad.impressions?.lower_bound,imMax=ad.impressions?.upper_bound;
-  const sc=spMin!=null?`<span class="chip spend">💵 $${fN(spMin)}–$${fN(spMax||spMin)}</span>`:'';
-  const ic=imMin!=null?`<span class="chip imp">👁 ${fN(imMin)}–${fN(imMax||imMin)}</span>`:'';
-  const dc=ad.ad_creation_time?`<span class="chip date">📅 ${fD(ad.ad_creation_time)}</span>`:'';
-  const ac=ad.ad_delivery_stop_time?`<span class="chip inactive-chip">● STOPPED</span>`:`<span class="chip active-chip">● ACTIVE</span>`;
-  const dr=domain?`<div class="url-row"><span class="url-lbl">DOMAIN</span><span class="url-val fb-url">${esc(domain)}</span></div>`:'';
-  const {html:ch,dlUrl,dlType}=getFbC(ad);
+  const {html:ch,dlUrl,dlType}=getFbCreative(ad);
   const db=dlType==='image'?`<a class="c-btn" href="${dlUrl}" download target="_blank">⬇ IMG</a>`:dlType==='video'?`<a class="c-btn" href="${dlUrl}" target="_blank">▶ VID</a>`:'';
   card.innerHTML=`
     <div class="card-head"><div class="page-info"><div class="page-name">${esc(ad.page_name||'Unknown')}</div><div class="page-sub">ID: ${ad.page_id||'—'}</div></div><div class="card-badges">${plats}</div></div>
@@ -377,7 +605,13 @@ function makeFbCard(ad,i){
       ${title?`<div class="ad-title-fb">${esc(title)}</div>`:''}
       ${body?`<div class="ad-body-text" id="ab_${ad.id}">${esc(body)}</div><button class="expand-txt" onclick="expT('ab_${ad.id}',this)">▼ more</button>`:''}
       ${!title&&!body?`<div style="font-size:11px;color:var(--text3);opacity:.5;margin-bottom:8px">No ad copy</div>`:''}
-      ${dr}<div class="chips">${ac}${sc}${ic}${dc}</div>
+      ${domain?`<div class="url-row"><span class="url-lbl">DOMAIN</span><span class="url-val fb-url">${esc(domain)}</span></div>`:''}
+      <div class="chips">
+        ${ad.ad_delivery_stop_time?`<span class="chip inactive-chip">● STOPPED</span>`:`<span class="chip active-chip">● ACTIVE</span>`}
+        ${spMin!=null?`<span class="chip spend">💵 $${fN(spMin)}–$${fN(spMax||spMin)}</span>`:''}
+        ${imMin!=null?`<span class="chip imp">👁 ${fN(imMin)}–${fN(imMax||imMin)}</span>`:''}
+        ${ad.ad_creation_time?`<span class="chip date">📅 ${fD(ad.ad_creation_time)}</span>`:''}
+      </div>
     </div>
     <div class="card-foot">
       ${ch?`<button class="foot-btn" onclick="togC('cr_${ad.id}')">👁 PREVIEW</button>`:''}
@@ -386,32 +620,7 @@ function makeFbCard(ad,i){
     </div>`;
   return card;
 }
-
-function makeGgCard(ad,i){
-  const card=document.createElement('div');card.className='ad-card gg-card';card.style.animationDelay=`${i*.03}s`;
-  const domain=xDomain(ad.displayed_link||ad.link||'');
-  const isTop=ad._pos==='top';
-  const lu=ad.link||'';
-  const sl=(ad.sitelinks||[]).slice(0,4).map(s=>`<span class="sitelink">${esc(s.title||'')}</span>`).join('');
-  const hasCall=(ad.extensions||[]).some(e=>/\d{3}[-.\s]\d{3}[-.\s]\d{4}|\(\d{3}\)/.test(e));
-  const ur=lu?`<div class="url-row" onclick="cpUrl('${esc(lu)}')"><span class="url-lbl">LANDING URL</span><span class="url-val gg-url" title="${esc(lu)}">${esc(lu)}</span><button class="copy-btn">⎘</button></div>`:'';
-  card.innerHTML=`
-    <div class="card-head"><div class="page-info"><div class="page-name">${esc(domain||'Unknown')}</div><div class="page-sub gg-sub">${esc(ad.displayed_link||'')}</div></div><span class="pos-badge ${isTop?'top':'bot'}">${isTop?'▲ TOP':'▼ BOT'}</span></div>
-    <div class="card-body">
-      ${ad.title?`<div class="ad-headline">${esc(ad.title)}</div>`:''}
-      ${ad.description?`<div class="ad-body-text" id="gd_${i}">${esc(ad.description)}</div><button class="expand-txt" onclick="expT('gd_${i}',this)">▼ more</button>`:''}
-      ${sl?`<div class="sitelinks">${sl}</div>`:''}
-      ${ur}
-      <div class="chips"><span class="chip ${isTop?'pos-top':'pos-bot'}">${isTop?'▲ TOP':'▼ BOT'}</span>${hasCall?`<span class="chip call">📞 CALL EXT</span>`:''}${ad.rating?`<span class="chip rating">⭐ ${ad.rating}</span>`:''}</div>
-    </div>
-    <div class="card-foot">
-      ${lu?`<a class="foot-btn" href="${esc(lu)}" target="_blank">🌐 VISIT</a>`:''}
-      <a class="foot-btn ml" href="https://www.google.com/search?q=${encodeURIComponent(currentKeyword||'')}" target="_blank">🔍 SERP</a>
-    </div>`;
-  return card;
-}
-
-function getFbC(ad){
+function getFbCreative(ad){
   const imgs=ad.ad_creative_images;
   if(imgs?.length){const src=imgs[0].original_image_url||imgs[0].url||'';if(src)return{html:`<img src="${src}" loading="lazy" onerror="this.parentElement.style.display='none'">`,dlUrl:src,dlType:'image'};}
   const vids=ad.ad_creative_videos;
@@ -419,42 +628,491 @@ function getFbC(ad){
   if(ad.ad_snapshot_url)return{html:`<iframe class="creative-iframe" src="${ad.ad_snapshot_url}" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe>`,dlUrl:ad.ad_snapshot_url,dlType:'snapshot'};
   return{html:'',dlUrl:'',dlType:''};
 }
-
+function showFbLoading(kw){
+  document.getElementById('fbAdGrid').innerHTML=`<div class="state-wrap"><div class="spinner fb-spin"></div><div class="loading-kw">Scanning Facebook: "${kw}"...</div></div>`;
+  document.getElementById('fbResultsHeader').classList.add('hidden');
+  document.getElementById('fbPagination').classList.add('hidden');
+}
+function showFbErr(msg){isLoading=false;document.getElementById('fbAdGrid').innerHTML=`<div class="state-wrap"><div class="err-box">⚠ ${esc(msg)}</div></div>`;}
 function goPage(dir){
-  if(!currentKeyword||activeTab!=='fb')return;
-  if(dir==='next'&&currentCursor){afterCursors.push(currentCursor);currentPage++;fetchFb(currentKeyword,currentLabel,currentCursor);}
-  else if(dir==='prev'&&currentPage>1){afterCursors.pop();currentPage--;fetchFb(currentKeyword,currentLabel,afterCursors.length?afterCursors[afterCursors.length-1]:null);}
+  if(!currentKw)return;
+  if(dir==='next'&&fbCursor){fbAfterCursors.push(fbCursor);fbPage++;fetchFb(currentKw,currentLabel,fbCursor);}
+  else if(dir==='prev'&&fbPage>1){fbAfterCursors.pop();fbPage--;fetchFb(currentKw,currentLabel,fbAfterCursors.length?fbAfterCursors[fbAfterCursors.length-1]:null);}
 }
-function updatePag(){
-  const pag=document.getElementById('pagination');
-  if(activeTab!=='fb'){pag.classList.add('hidden');return;}
-  pag.classList.remove('hidden');
-  document.getElementById('pgInfo').textContent=`Page ${currentPage}`;
-  document.getElementById('pgPrev').disabled=currentPage<=1;
-  document.getElementById('pgNext').disabled=!currentCursor;
+function updateFbPag(){
+  const pag=document.getElementById('fbPagination');pag.classList.remove('hidden');
+  document.getElementById('pgInfo').textContent=`Page ${fbPage}`;
+  document.getElementById('pgPrev').disabled=fbPage<=1;
+  document.getElementById('pgNext').disabled=!fbCursor;
 }
 
-function updateHdr(title,sub,count,uniq){
-  document.getElementById('resultsHeader').classList.remove('hidden');
-  document.getElementById('rhTitle').textContent=title;
-  document.getElementById('rhSub').textContent=sub;
-  document.getElementById('rhCount').textContent=count;
-  document.getElementById('rhUniq').textContent=uniq;
+// ═══════════════════════════════════════════
+//  GOOGLE FETCH
+// ═══════════════════════════════════════════
+async function fetchGg(keyword,label){
+  if(isLoading)return;if(!GG_KEY){openCfg();return;}
+  isLoading=true;currentKw=keyword;currentLabel=label;
+  showGgLoading(keyword);
+  const country=document.getElementById('fCountry').value;
+  const device=document.getElementById('fDevice').value||'desktop';
+  const cacheKey=`${keyword}|${country}|${device}`;
+  if(ggResultCache[cacheKey]){processGgData(ggResultCache[cacheKey],keyword,label);isLoading=false;return;}
+  const params=new URLSearchParams({engine:'google',q:keyword,api_key:GG_KEY,gl:country,hl:'en',device:device,num:'100'});
+  if(GG_LOC)params.append('location',GG_LOC);
+  try{
+    const res=await fetch(`/api/serp?${params}`);
+    const data=await res.json();
+    if(data.error){showGgErr(data.error);return;}
+    ggResultCache[cacheKey]=data;
+    addToHistory(keyword);
+    processGgData(data,keyword,label);
+  }catch(e){showGgErr('Network error: '+e.message);}finally{isLoading=false;}
 }
-function sortAds(ads){
-  const s=document.getElementById('sortSel').value;
-  if(s==='newest')return[...ads].sort((a,b)=>new Date(b.ad_creation_time||0)-new Date(a.ad_creation_time||0));
-  if(s==='alpha')return[...ads].sort((a,b)=>(a.title||a.page_name||'').localeCompare(b.title||b.page_name||''));
-  return ads;
-}
-function reSort(){if(allAds.length){if(activeTab==='fb')renderFb(allAds,currentLabel,currentKeyword);else renderGg(allAds,currentLabel,currentKeyword);}}
-function togC(id){const el=document.getElementById(id);if(el)el.classList.toggle('visible');}
-function expT(id,btn){const el=document.getElementById(id);if(!el)return;const e=el.classList.toggle('exp');btn.textContent=e?'▲ less':'▼ more';}
-function cpUrl(url){navigator.clipboard.writeText(url).then(()=>{const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);});}
-function showLoading(kw,tab){document.getElementById('adGrid').innerHTML=`<div class="state-wrap"><div class="spinner ${tab}-spin"></div><div class="loading-kw">Scanning: "${kw}"...</div></div>`;document.getElementById('resultsHeader').classList.add('hidden');document.getElementById('pagination').classList.add('hidden');}
-function showErr(msg){isLoading=false;document.getElementById('adGrid').innerHTML=`<div class="err-box">⚠ ERROR: ${esc(msg)}<br><small>Check API config in ⚙ CONFIG.</small></div>`;}
-function emptyHtml(msg){return`<div class="state-wrap"><div class="state-icon">📭</div><div class="state-title">No ads found</div><div class="state-sub">${msg}</div></div>`;}
 
+function processGgData(data,keyword,label){
+  const paidAds=(data.ads||[]).map(a=>({...a,_type:'paid',_pos:a.position||0}));
+  const botAds=(data.bottom_ads||[]).map(a=>({...a,_type:'paid',_pos:(a.position||0)+50}));
+  const organic=(data.organic_results||[]).map(a=>({...a,_type:'organic'}));
+  const allPaid=[...paidAds,...botAds];
+  const allResults=[...allPaid,...organic];
+  const relatedSearches=data.related_searches||[];
+  const paa=data.related_questions||[];
+
+  // update stats
+  const advertisers=new Set(allPaid.map(a=>xDomain(a.displayed_link||a.link||'')));
+  document.getElementById('statPaid').textContent=allPaid.length;
+  document.getElementById('statOrganic').textContent=organic.length;
+  document.getElementById('statAdvertisers').textContent=advertisers.size;
+
+  // intent
+  const intent=detectIntent(keyword);
+  document.getElementById('statIntent').textContent=intent.toUpperCase();
+  document.getElementById('statIntent').className='lp-stat-val '+(intent==='high'?'green':intent==='medium'?'':'red');
+
+  // validation score
+  renderValidationScore(keyword,allPaid.length,advertisers.size);
+
+  // top advertisers
+  renderTopAdvertisers(allPaid);
+
+  // render ads tab
+  renderGgAds(allPaid,organic,keyword,label);
+
+  // intel tab
+  renderIntelligence(allPaid,organic);
+
+  // keywords tab
+  renderKeywords(keyword,relatedSearches,paa);
+
+  // geo tab
+  renderGeo(keyword,allPaid.length,document.getElementById('fCountry').value);
+
+  // angle chart
+  renderAngleChart(allPaid,organic);
+
+  switchGgTab('ads');
+}
+
+// ═══════════════════════════════════════════
+//  INTENT DETECTION
+// ═══════════════════════════════════════════
+function detectIntent(kw){
+  const k=kw.toLowerCase();
+  const highWords=['phone','call','number','support','reservation','book now','speak','agent','representative','24/7','contact','help line'];
+  const medWords=['service','near me','company','contractor','quote','rate','insurance','loan','repair','install'];
+  if(highWords.some(w=>k.includes(w)))return'high';
+  if(medWords.some(w=>k.includes(w)))return'medium';
+  return'low';
+}
+
+function detectAngles(text){
+  if(!text)return[];const t=text.toLowerCase();const angles=[];
+  const discountWords=['save','%','off','deal','cheap','free','discount','low cost','affordable','best price','lowest'];
+  const urgencyWords=['call now','limited','today','fast','quick','24/7','emergency','immediate','now','hurry','don\'t wait','act now'];
+  const supportWords=['support','help','service','assist','expert','specialist','professional','certified','licensed','team'];
+  const brandWords=['#1','top rated','best','leading','trusted','award','official','verified','guaranteed']);
+  if(discountWords.some(w=>t.includes(w)))angles.push('discount');
+  if(urgencyWords.some(w=>t.includes(w)))angles.push('urgency');
+  if(supportWords.some(w=>t.includes(w)))angles.push('support');
+  if(brandWords.some(w=>t.includes(w)))angles.push('brand');
+  return angles;
+}
+
+// ═══════════════════════════════════════════
+//  RENDER — ADS TAB
+// ═══════════════════════════════════════════
+function renderGgAds(paid,organic,keyword,label){
+  const el=document.getElementById('gc-ads');
+  el.innerHTML='';
+  if(!paid.length&&!organic.length){
+    el.innerHTML=`<div style="text-align:center;padding:60px 20px"><div style="font-size:36px;opacity:.2;margin-bottom:12px">📭</div><div style="font-size:14px;font-weight:600;color:var(--text2)">No results found</div><div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:8px;line-height:1.7">Try a different keyword or country.</div></div>`;
+    return;
+  }
+  const hdr=document.createElement('div');
+  hdr.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px';
+  hdr.innerHTML=`
+    <div>
+      <div style="font-size:14px;font-weight:700;color:var(--text)">${esc(label)}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px">"${esc(keyword)}" · ${paid.length} paid ads · ${organic.length} organic</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <span style="font-family:var(--mono);font-size:9px;background:var(--odim);border:1px solid rgba(255,107,53,.2);color:var(--orange);padding:3px 8px;border-radius:4px">▲ PAID ADS: ${paid.length}</span>
+      <span style="font-family:var(--mono);font-size:9px;background:var(--bdim);border:1px solid rgba(61,142,248,.2);color:var(--blue);padding:3px 8px;border-radius:4px">● ORGANIC: ${organic.length}</span>
+      <button onclick="saveKeyword('${esc(keyword)}')" class="fav-btn" title="Save keyword">★</button>
+    </div>`;
+  el.appendChild(hdr);
+
+  [...paid,...organic].forEach((ad,i)=>{
+    const card=document.createElement('div');
+    const isPaid=ad._type==='paid';
+    card.className='gg-ad-card '+(isPaid?'paid':'organic');
+    card.style.animationDelay=`${i*.02}s`;
+    const intent=detectIntent((ad.title||'')+(ad.description||''));
+    const angles=detectAngles((ad.title||'')+(ad.description||''));
+    const lu=ad.link||'';
+    const domain=xDomain(ad.displayed_link||lu);
+    const hasCall=(ad.extensions||[]).some(e=>/\d{3}[-.\s]\d{3}[-.\s]\d{4}|\(\d{3}\)/.test(e));
+    const sls=(ad.sitelinks||[]).slice(0,4);
+    card.innerHTML=`
+      <div class="gg-ad-type ${isPaid?'paid-lbl':'organic-lbl'}">
+        ${isPaid?'▲ PAID AD':'● ORGANIC'}
+        ${isPaid?`<span class="gg-ad-pos">POS ${ad.position||'?'}</span>`:''}
+      </div>
+      ${ad.title?`<div class="gg-ad-headline">${esc(ad.title)}</div>`:''}
+      <div class="gg-ad-url" onclick="${lu?`cpUrl('${esc(lu)}')`:''}">
+        <span style="color:var(--text3);font-size:8px">${isPaid?'URL':'ORG'}</span>
+        ${esc(ad.displayed_link||domain||'—')}
+        ${lu?'<span style="font-size:8px;color:var(--text3)">⎘</span>':''}
+      </div>
+      ${ad.description?`<div class="gg-ad-desc">${esc(ad.description)}</div>`:''}
+      ${sls.length?`<div class="sitelinks-row">${sls.map(s=>`<span class="sitelink-chip">${esc(s.title||'')}</span>`).join('')}</div>`:''}
+      ${hasCall?`<div class="call-ext">📞 Call extension detected</div>`:''}
+      <div class="gg-ad-foot">
+        <span class="intent-tag ${intent}">${intent.toUpperCase()} INTENT</span>
+        ${angles.map(a=>`<span class="angle-tag ${a}">${a.toUpperCase()}</span>`).join('')}
+        ${lu?`<a href="${esc(lu)}" target="_blank" class="foot-btn" style="margin-left:auto;font-size:9px">🌐 VISIT</a>`:''}
+      </div>`;
+    el.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  RENDER — INTELLIGENCE TAB
+// ═══════════════════════════════════════════
+function renderIntelligence(paid,organic){
+  const el=document.getElementById('gc-intel');el.innerHTML='';
+  const all=[...paid,...organic];
+  const allText=all.map(a=>(a.title||'')+' '+(a.description||'')).join(' ');
+
+  // angle groups
+  const angleGroups={discount:[],urgency:[],support:[],brand:[]};
+  all.forEach(a=>{
+    const text=(a.title||'')+' '+(a.description||'');
+    const angles=detectAngles(text);
+    angles.forEach(ang=>angleGroups[ang].push({domain:xDomain(a.displayed_link||a.link||''),text:a.title||a.description||''}));
+  });
+
+  const intelHtml=`
+    <div class="intel-section">
+      <div class="intel-title">AD ANGLE GROUPS</div>
+      ${Object.entries(angleGroups).map(([ang,items])=>{
+        if(!items.length)return'';
+        const colors={discount:'var(--green)',urgency:'var(--red)',support:'var(--blue)',brand:'var(--purple)'};
+        return`<div class="angle-group">
+          <div class="angle-group-header">
+            <div class="angle-group-name" style="color:${colors[ang]}">${ang.toUpperCase()} (${items.length})</div>
+          </div>
+          <div class="angle-examples">${[...new Set(items.slice(0,3).map(x=>x.text.substring(0,50)))].map(t=>`<div class="angle-ex">${esc(t)}...</div>`).join('')}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="intel-section">
+      <div class="intel-title">TOP REPEATED PHRASES</div>
+      ${topPhrases(allText).map(([phrase,count])=>`
+        <div class="word-freq-item">
+          <div class="word-freq-word">${esc(phrase)}</div>
+          <div class="word-freq-bar"><div class="word-freq-fill" style="width:${Math.min(100,(count/topPhrases(allText)[0][1])*100)}%"></div></div>
+          <div class="word-freq-count">×${count}</div>
+        </div>`).join('')}
+    </div>
+    <div class="intel-section">
+      <div class="intel-title">AD REPETITION (SAME ADVERTISER)</div>
+      ${getRepeatAdvertisers(paid).length
+        ? getRepeatAdvertisers(paid).map(([domain,count])=>`
+          <div class="repeat-item">
+            <div class="repeat-domain">${esc(domain)}</div>
+            <span class="repeat-count">×${count} ads</span>
+            ${count>=3?`<span class="repeat-badge">AGGRESSIVE</span>`:''}
+          </div>`).join('')
+        : '<div class="empty-msg">No repeat advertisers detected</div>'}
+    </div>`;
+  el.innerHTML=intelHtml;
+}
+
+function topPhrases(text){
+  const words=text.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w=>w.length>4&&!['with','that','this','from','your','have','will','their','there','about','which','would','could','should','insurance'].includes(w));
+  const freq={};words.forEach(w=>freq[w]=(freq[w]||0)+1);
+  return Object.entries(freq).filter(([,c])=>c>1).sort((a,b)=>b[1]-a[1]).slice(0,12);
+}
+
+function getRepeatAdvertisers(paid){
+  const freq={};
+  paid.forEach(a=>{const d=xDomain(a.displayed_link||a.link||'');if(d)freq[d]=(freq[d]||0)+1;});
+  return Object.entries(freq).filter(([,c])=>c>1).sort((a,b)=>b[1]-a[1]);
+}
+
+// ═══════════════════════════════════════════
+//  RENDER — KEYWORD EXPANSION
+// ═══════════════════════════════════════════
+function renderKeywords(keyword,related,paa){
+  const el=document.getElementById('gc-keywords');el.innerHTML='';
+  const highIntentWords=['phone','call','number','support','help','service','reservation','book','contact','speak','agent','24/7'];
+
+  const filterHighIntent=(kws)=>kws.filter(k=>{
+    const q=(k.query||k.question||'').toLowerCase();
+    return highIntentWords.some(w=>q.includes(w));
+  });
+  const allHighIntent=filterHighIntent([...related,...paa]);
+  const allMedium=[...related,...paa].filter(k=>{
+    const q=(k.query||k.question||'').toLowerCase();
+    return!highIntentWords.some(w=>q.includes(w));
+  });
+
+  el.innerHTML=`
+    <div style="margin-bottom:20px">
+      <div class="intel-title">HIGH INTENT KEYWORDS (Pay-Per-Call Ready)</div>
+      ${allHighIntent.length
+        ?`<div style="display:flex;flex-wrap:wrap;gap:0">${allHighIntent.map(k=>{
+            const q=k.query||k.question||'';
+            return`<span class="kw-chip" onclick="searchFromChip('${esc(q)}')">
+              ${esc(q)}
+              <span class="kw-intent intent-tag high">HIGH</span>
+            </span>`;
+          }).join('')}</div>`
+        :`<div class="empty-msg">No high-intent keywords found.<br>Try adding "phone", "call", or "number" to your search.</div>`}
+    </div>
+    <div style="margin-bottom:20px">
+      <div class="intel-title">RELATED SEARCHES (Medium Intent)</div>
+      ${allMedium.length
+        ?`<div style="display:flex;flex-wrap:wrap;gap:0">${allMedium.slice(0,20).map(k=>{
+            const q=k.query||k.question||'';
+            return`<span class="kw-chip" onclick="searchFromChip('${esc(q)}')">
+              ${esc(q)}
+              <span class="kw-intent intent-tag medium">MED</span>
+            </span>`;
+          }).join('')}</div>`
+        :`<div class="empty-msg">No related searches available.</div>`}
+    </div>
+    <div>
+      <div class="intel-title">KEYWORD VARIATIONS TO TEST</div>
+      <div style="display:flex;flex-wrap:wrap;gap:0">
+        ${[keyword+' phone number',keyword+' call now',keyword+' 24/7',keyword+' near me',keyword+' service',keyword+' help','best '+keyword,'cheap '+keyword,keyword+' agent',keyword+' support'].map(v=>
+          `<span class="kw-chip" onclick="searchFromChip('${esc(v)}')">${esc(v)}<span class="kw-intent intent-tag ${detectIntent(v)}">${detectIntent(v).toUpperCase()}</span></span>`
+        ).join('')}
+      </div>
+    </div>`;
+}
+
+function searchFromChip(kw){
+  document.getElementById('searchInput').value=kw;
+  fetchGg(kw,kw);
+}
+
+// ═══════════════════════════════════════════
+//  RENDER — GEO TAB
+// ═══════════════════════════════════════════
+async function renderGeo(keyword,currentCount,currentCountry){
+  const el=document.getElementById('gc-geo');
+  el.innerHTML=`<div style="font-family:var(--mono);font-size:11px;color:var(--text3);padding:20px">Analyzing geo data for "${keyword}"...<br><br>Showing cached results for current country. Run searches in different countries to compare.</div>`;
+
+  const countries=[
+    {code:'us',flag:'🇺🇸',name:'United States'},
+    {code:'gb',flag:'🇬🇧',name:'United Kingdom'},
+    {code:'ca',flag:'🇨🇦',name:'Canada'},
+    {code:'au',flag:'🇦🇺',name:'Australia'},
+  ];
+
+  const geoData=countries.map(c=>{
+    const ck=`${keyword}|${c.code}|desktop`;
+    const cached=ggResultCache[ck];
+    const paidCount=cached?((cached.ads||[]).length+(cached.bottom_ads||[]).length):c.code===currentCountry?currentCount:null;
+    return{...c,paidCount};
+  });
+
+  const maxCount=Math.max(...geoData.map(g=>g.paidCount||0),1);
+
+  el.innerHTML=`
+    <div style="margin-bottom:24px">
+      <div class="intel-title">AD DENSITY BY COUNTRY</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:12px">More ads = proven market with active advertisers</div>
+      ${geoData.map(g=>`
+        <div class="geo-item">
+          <div class="geo-flag">${g.flag}</div>
+          <div class="geo-country">${g.name}</div>
+          ${g.paidCount!=null
+            ?`<div style="flex:1;display:flex;align-items:center;gap:8px">
+                <div class="geo-bar"><div class="geo-fill" style="width:${(g.paidCount/maxCount)*100}%"></div></div>
+                <div class="geo-count">${g.paidCount} ads</div>
+                ${g.paidCount>=3?`<span style="font-family:var(--mono);font-size:8px;background:var(--gdim);border:1px solid rgba(0,229,160,.2);color:var(--green);padding:2px 6px;border-radius:3px">ACTIVE</span>`:''}
+              </div>`
+            :`<div style="flex:1;display:flex;align-items:center;gap:8px">
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text3)">Not yet searched</div>
+                <button onclick="fetchGeoCountry('${keyword}','${g.code}')" style="font-family:var(--mono);font-size:9px;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:4px;padding:3px 8px;cursor:pointer">FETCH</button>
+              </div>`}
+        </div>`).join('')}
+    </div>
+    <div>
+      <div class="intel-title">OPPORTUNITY SCORE</div>
+      ${geoData.filter(g=>g.paidCount!=null).map(g=>{
+        const score=g.paidCount>=5?'HIGH':g.paidCount>=2?'MEDIUM':'LOW';
+        const cls=score==='HIGH'?'high':score==='MEDIUM'?'medium':'low';
+        return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px">
+          <div style="font-size:14px">${g.flag}</div>
+          <div style="flex:1;font-size:12px;font-weight:600;color:var(--text)">${g.name}</div>
+          <span class="vc-score ${cls}">${score} OPPORTUNITY</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+async function fetchGeoCountry(keyword,countryCode){
+  const params=new URLSearchParams({engine:'google',q:keyword,api_key:GG_KEY,gl:countryCode,hl:'en',device:'desktop',num:'20'});
+  try{
+    const res=await fetch(`/api/serp?${params}`);const data=await res.json();
+    const ck=`${keyword}|${countryCode}|desktop`;ggResultCache[ck]=data;
+    renderGeo(keyword,null,null);
+  }catch(e){showToast('Fetch failed');}
+}
+
+// ═══════════════════════════════════════════
+//  VALIDATION SCORE
+// ═══════════════════════════════════════════
+function renderValidationScore(keyword,paidCount,advertiserCount){
+  const score=paidCount>=5?'high':paidCount>=2?'medium':'low';
+  const label=score==='high'?'✓ VALIDATED OFFER':score==='medium'?'⚠ MEDIUM OPPORTUNITY':'✗ LOW OPPORTUNITY';
+  const el=document.getElementById('validationScore');
+  el.innerHTML=`
+    <div style="background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:600;color:var(--text)">${esc(keyword.substring(0,22))}${keyword.length>22?'...':''}</div>
+        <span class="vc-score ${score}">${label}</span>
+      </div>
+      <div style="display:flex;gap:16px">
+        <div style="text-align:center">
+          <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--orange)">${paidCount}</div>
+          <div style="font-family:var(--mono);font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px">Paid Ads</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--blue)">${advertiserCount}</div>
+          <div style="font-family:var(--mono);font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px">Advertisers</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  TOP ADVERTISERS
+// ═══════════════════════════════════════════
+function renderTopAdvertisers(paid){
+  const freq={};
+  paid.forEach(a=>{const d=xDomain(a.displayed_link||a.link||'');if(d)freq[d]=(freq[d]||0)+1;});
+  const sorted=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const el=document.getElementById('topAdvertisers');
+  if(!sorted.length){el.innerHTML='<div class="empty-msg">No paid advertisers found</div>';return;}
+  el.innerHTML=sorted.map(([domain,count])=>`
+    <div class="repeat-item">
+      <div class="repeat-domain">${esc(domain)}</div>
+      <span class="repeat-count">×${count}</span>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+//  ANGLE CHART
+// ═══════════════════════════════════════════
+function renderAngleChart(paid,organic){
+  const all=[...paid,...organic];
+  const counts={discount:0,urgency:0,support:0,brand:0,none:0};
+  all.forEach(a=>{
+    const angles=detectAngles((a.title||'')+(a.description||''));
+    if(!angles.length)counts.none++;else angles.forEach(ang=>{if(counts[ang]!=null)counts[ang]++;});
+  });
+  document.getElementById('intentChartWrap').style.display='block';
+  const ctx=document.getElementById('angleChart').getContext('2d');
+  if(angleChartInst)angleChartInst.destroy();
+  angleChartInst=new Chart(ctx,{type:'doughnut',data:{
+    labels:['Discount','Urgency','Support','Brand','None'],
+    datasets:[{data:[counts.discount,counts.urgency,counts.support,counts.brand,counts.none],
+      backgroundColor:['#00e5a0','#ff4d6a','#3d8ef8','#a78bfa','#243040'],
+      borderWidth:0}]},
+    options:{plugins:{legend:{labels:{color:'#8a9bb5',font:{family:'IBM Plex Mono',size:10}}}},cutout:'65%'}
+  });
+}
+
+// ═══════════════════════════════════════════
+//  LOADING / ERROR
+// ═══════════════════════════════════════════
+function showGgLoading(kw){
+  document.getElementById('gc-ads').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px"><div class="spinner gg-spin"></div><div class="loading-kw">Scanning Google: "${kw}"...</div></div>`;
+  document.getElementById('gc-intel').innerHTML='<div class="empty-msg" style="margin-top:60px">Loading...</div>';
+  document.getElementById('gc-keywords').innerHTML='<div class="empty-msg" style="margin-top:60px">Loading...</div>';
+}
+function showGgErr(msg){
+  isLoading=false;
+  document.getElementById('gc-ads').innerHTML=`<div class="err-box" style="margin:20px">⚠ ERROR: ${esc(msg)}<br><small>Check CONFIG settings or try a different keyword.</small></div>`;
+}
+
+// ═══════════════════════════════════════════
+//  HISTORY & FAVORITES
+// ═══════════════════════════════════════════
+function addToHistory(kw){
+  let hist=JSON.parse(localStorage.getItem('adspy_hist')||'[]');
+  hist=hist.filter(h=>h.kw!==kw);
+  hist.unshift({kw,time:new Date().toISOString()});
+  hist=hist.slice(0,30);
+  localStorage.setItem('adspy_hist',JSON.stringify(hist));
+  renderHistory();
+}
+function renderHistory(){
+  const hist=JSON.parse(localStorage.getItem('adspy_hist')||'[]');
+  const el=document.getElementById('historyList');
+  if(!hist.length){el.innerHTML='<div class="empty-msg">No search history yet</div>';return;}
+  el.innerHTML=hist.map((h,i)=>`
+    <div class="hist-item" onclick="searchFromChip('${esc(h.kw)}')">
+      <div class="hist-kw">${esc(h.kw)}</div>
+      <div class="hist-time">${timeAgo(h.time)}</div>
+      <button class="hist-del" onclick="event.stopPropagation();deleteHistory(${i})">✕</button>
+    </div>`).join('');
+}
+function deleteHistory(i){
+  let hist=JSON.parse(localStorage.getItem('adspy_hist')||'[]');
+  hist.splice(i,1);localStorage.setItem('adspy_hist',JSON.stringify(hist));renderHistory();
+}
+function clearHistory(){localStorage.removeItem('adspy_hist');renderHistory();}
+
+function saveKeyword(kw){
+  let favs=JSON.parse(localStorage.getItem('adspy_favs')||'[]');
+  if(!favs.includes(kw)){favs.unshift(kw);localStorage.setItem('adspy_favs',JSON.stringify(favs));showToast('★ Saved: '+kw);}
+  else{showToast('Already saved');}
+  renderFavorites();
+}
+function renderFavorites(){
+  const favs=JSON.parse(localStorage.getItem('adspy_favs')||'[]');
+  const el=document.getElementById('favoritesList');
+  if(!favs.length){el.innerHTML='<div class="empty-msg">No saved keywords.<br>Click ★ on any search result to save.</div>';return;}
+  el.innerHTML=favs.map((kw,i)=>`
+    <div class="hist-item" onclick="searchFromChip('${esc(kw)}')">
+      <div class="hist-kw">★ ${esc(kw)}</div>
+      <button class="hist-del" onclick="event.stopPropagation();deleteFav(${i})">✕</button>
+    </div>`).join('');
+}
+function deleteFav(i){
+  let favs=JSON.parse(localStorage.getItem('adspy_favs')||'[]');
+  favs.splice(i,1);localStorage.setItem('adspy_favs',JSON.stringify(favs));renderFavorites();
+}
+
+// ═══════════════════════════════════════════
+//  CONFIG & VERIFY
+// ═══════════════════════════════════════════
 function openCfg(){
   if(activeTab==='fb'){document.getElementById('cfgFbToken').value=FB_TOKEN||'';document.getElementById('fbModal').classList.remove('hidden');}
   else{document.getElementById('cfgGgKey').value=GG_KEY||'';document.getElementById('cfgGgLoc').value=GG_LOC||'';document.getElementById('ggModal').classList.remove('hidden');}
@@ -467,22 +1125,29 @@ function verifyKey(){
   if(activeTab==='fb'){
     if(!FB_TOKEN){badge.className='api-badge err';badge.textContent='● NO TOKEN';return;}
     fetch(`https://graph.facebook.com/v21.0/me?access_token=${FB_TOKEN}`).then(r=>r.json()).then(d=>{
-      if(d.error){badge.className='api-badge err';badge.textContent='● INVALID TOKEN';}
-      else{badge.className='api-badge ok';badge.textContent='● FB TOKEN OK';}
+      badge.className=d.error?'api-badge err':'api-badge ok';badge.textContent=d.error?'● INVALID TOKEN':'● FB TOKEN OK';
     }).catch(()=>{badge.className='api-badge err';badge.textContent='● CHECK FAILED';});
   }else{
     if(!GG_KEY){badge.className='api-badge err';badge.textContent='● NO API KEY';return;}
     fetch(`https://serpapi.com/account.json?api_key=${GG_KEY}`).then(r=>r.json()).then(d=>{
-      if(d.error){badge.className='api-badge err';badge.textContent='● INVALID KEY';}
-      else{badge.className='api-badge ok';badge.textContent=`● SERP OK · ${d.plan_searches_left||'?'} left`;}
+      badge.className=d.error?'api-badge err':'api-badge ok';
+      badge.textContent=d.error?'● INVALID KEY':`● SERP OK · ${d.plan_searches_left||'?'} left`;
     }).catch(()=>{badge.className='api-badge ok';badge.textContent='● SERP KEY LOADED';});
   }
 }
 
+// ═══════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fD(s){return new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
 function fN(n){const x=parseInt(n||0);if(x>=1000000)return(x/1000000).toFixed(1)+'M';if(x>=1000)return(x/1000).toFixed(0)+'K';return x.toString();}
 function xDomain(url){try{return new URL(url.startsWith('http')?url:'https://'+url).hostname.replace('www.','');}catch{return url.split('/')[0].replace('www.','');}}
+function togC(id){const el=document.getElementById(id);if(el)el.classList.toggle('visible');}
+function expT(id,btn){const el=document.getElementById(id);if(!el)return;const e=el.classList.toggle('exp');btn.textContent=e?'▲ less':'▼ more';}
+function cpUrl(url){navigator.clipboard.writeText(url).then(()=>showToast('✓ Copied!'));}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
+function timeAgo(iso){const s=Math.floor((Date.now()-new Date(iso))/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
 </script>
 </body>
 </html>
