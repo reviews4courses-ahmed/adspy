@@ -253,7 +253,7 @@ let allAds=[],afterCursors=[],currentCursor=null,currentPage=1;
 let currentKeyword=null,currentLabel=null,isLoading=false;
 
 const FB_API='https://graph.facebook.com/v21.0/ads_archive';
-const SERP_API='https://serpapi.com/search.json';
+const SERP_API='/api/serp';
 const FB_FIELDS='id,ad_creation_time,ad_delivery_start_time,ad_delivery_stop_time,ad_creative_bodies,ad_creative_link_captions,ad_creative_link_descriptions,ad_creative_link_titles,ad_snapshot_url,currency,impressions,page_id,page_name,publisher_platforms,spend,ad_creative_images,ad_creative_videos';
 
 window.onload=()=>{buildSidebar();switchTab('fb')};
