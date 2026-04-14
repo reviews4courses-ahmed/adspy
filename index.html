@@ -730,7 +730,7 @@ function detectAngles(text){
   const discountWords=['save','%','off','deal','cheap','free','discount','low cost','affordable','best price','lowest'];
   const urgencyWords=['call now','limited','today','fast','quick','24/7','emergency','immediate','now','hurry','don\'t wait','act now'];
   const supportWords=['support','help','service','assist','expert','specialist','professional','certified','licensed','team'];
-  const brandWords=['#1','top rated','best','leading','trusted','award','official','verified','guaranteed']);
+  const brandWords=['#1','top rated','best','leading','trusted','award','official','verified','guaranteed'];
   if(discountWords.some(w=>t.includes(w)))angles.push('discount');
   if(urgencyWords.some(w=>t.includes(w)))angles.push('urgency');
   if(supportWords.some(w=>t.includes(w)))angles.push('support');
