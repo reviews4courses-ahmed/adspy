@@ -853,16 +853,12 @@ function makeCallSpyCard(ad,i){
   const imMin=ad.impressions?.lower_bound,imMax=ad.impressions?.upper_bound;
   const isSaved=fbFavorites.some(f=>f.id===ad.id);
   const plats=(ad.publisher_platforms||[]).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(', ');
-
-  // PPC score color
   const scoreColor=ad._ppcScore>=70?'var(--green)':ad._ppcScore>=40?'var(--yellow)':'var(--text3)';
-
-  // creative
-  const{html:creativeHtml,dlUrl,dlType}=getFbCreative(ad);
-
-  // vertical tag css class
+  const{html:creativeHtml,dlUrl,dlType,imgUrl,vidUrl,posterUrl}=getFbCreative(ad);
   const vtagClass=`vtag-${ad._vertical}`;
   const vtagLabel={flights:'✈ Flights',insurance:'🛡 Insurance',finance:'💳 Finance',home:'🏠 Home',legal:'⚖ Legal',other:'● Other'}[ad._vertical]||'● Other';
+  const snapshotUrl=ad.ad_snapshot_url||'';
+  const adId=ad.id||('ad_'+i);
 
   card.innerHTML=`
     <div class="cs-topbar">
@@ -871,19 +867,51 @@ function makeCallSpyCard(ad,i){
       <span class="cs-vertical-tag ${vtagClass}">${vtagLabel}</span>
     </div>
 
+    <!-- CREATIVE — always visible if available -->
     ${creativeHtml?`
-    <div class="cs-creative" id="csc_${ad.id}">
+    <div class="cs-creative show" id="csc_${adId}" style="position:relative">
       ${creativeHtml}
       <div class="cs-creative-overlay">
-        ${dlType==='image'?`<a class="cs-dl-btn" href="${dlUrl}" download target="_blank">⬇ IMG</a>`:''}
-        ${dlType==='video'?`<a class="cs-dl-btn" href="${dlUrl}" target="_blank">▶ VID</a>`:''}
-        <button class="cs-dl-btn" onclick="togCreative('csc_${ad.id}')">✕</button>
+        ${dlType==='image'&&imgUrl?`
+          <a class="cs-dl-btn" href="${esc(imgUrl)}" download="creative_${adId}.jpg" target="_blank" title="Download image">⬇ IMG</a>
+          <button class="cs-dl-btn" onclick="cpUrl('${esc(imgUrl)}')" title="Copy image URL">⎘ URL</button>`:''}
+        ${dlType==='video'&&vidUrl?`
+          <a class="cs-dl-btn" href="${esc(vidUrl)}" target="_blank" title="Open video">▶ VID</a>
+          <a class="cs-dl-btn" href="${esc(vidUrl)}" download="creative_${adId}.mp4" target="_blank" title="Download video">⬇ DL</a>`:''}
+        ${dlType==='snapshot'?`
+          <a class="cs-dl-btn" href="${esc(snapshotUrl)}" target="_blank" title="Open snapshot">🔗 VIEW</a>`:''}
       </div>
+    </div>`:''}
+
+    <!-- CREATIVE URL PANEL -->
+    ${(imgUrl||vidUrl||snapshotUrl)?`
+    <div style="background:var(--s2);border-bottom:1px solid var(--border);padding:8px 14px;display:flex;flex-direction:column;gap:5px">
+      ${imgUrl?`
+        <div class="cs-url-row" style="margin-bottom:0" onclick="cpUrl('${esc(imgUrl)}')">
+          <span class="cs-url-lbl">🖼 IMAGE URL</span>
+          <span class="cs-url-val" title="${esc(imgUrl)}">${esc(imgUrl.substring(0,60))}${imgUrl.length>60?'...':''}</span>
+          <a href="${esc(imgUrl)}" download="creative_${adId}.jpg" target="_blank" class="cs-dl-btn" style="padding:3px 7px;font-size:8px;flex-shrink:0">⬇</a>
+          <button onclick="event.stopPropagation();cpUrl('${esc(imgUrl)}')" class="cs-phone-copy">⎘</button>
+        </div>`:''}
+      ${vidUrl?`
+        <div class="cs-url-row" style="margin-bottom:0" onclick="cpUrl('${esc(vidUrl)}')">
+          <span class="cs-url-lbl">🎬 VIDEO URL</span>
+          <span class="cs-url-val" title="${esc(vidUrl)}">${esc(vidUrl.substring(0,60))}${vidUrl.length>60?'...':''}</span>
+          <a href="${esc(vidUrl)}" download="creative_${adId}.mp4" target="_blank" class="cs-dl-btn" style="padding:3px 7px;font-size:8px;flex-shrink:0">⬇</a>
+          <button onclick="event.stopPropagation();cpUrl('${esc(vidUrl)}')" class="cs-phone-copy">⎘</button>
+        </div>`:''}
+      ${snapshotUrl?`
+        <div class="cs-url-row" style="margin-bottom:0" onclick="cpUrl('${esc(snapshotUrl)}')">
+          <span class="cs-url-lbl">📋 SNAPSHOT</span>
+          <span class="cs-url-val" title="${esc(snapshotUrl)}">${esc(snapshotUrl.substring(0,60))}${snapshotUrl.length>60?'...':''}</span>
+          <a href="${esc(snapshotUrl)}" target="_blank" class="cs-dl-btn" style="padding:3px 7px;font-size:8px;flex-shrink:0">↗</a>
+          <button onclick="event.stopPropagation();cpUrl('${esc(snapshotUrl)}')" class="cs-phone-copy">⎘</button>
+        </div>`:''}
     </div>`:''}
 
     <div class="cs-body">
       ${title?`<div class="cs-headline">${esc(title)}</div>`:''}
-      ${body?`<div class="cs-copy" id="csc_body_${ad.id}">${esc(body)}</div><button class="cs-exp-btn" onclick="expBody('csc_body_${ad.id}',this)">▼ show more</button>`:''}
+      ${body?`<div class="cs-copy" id="csc_body_${adId}">${esc(body)}</div><button class="cs-exp-btn" onclick="expBody('csc_body_${adId}',this)">▼ show more</button>`:''}
       ${!title&&!body?`<div style="font-size:11px;color:var(--text3);opacity:.5;margin-bottom:8px">No ad copy available</div>`:''}
 
       ${ad._phones.length?`
@@ -895,9 +923,10 @@ function makeCallSpyCard(ad,i){
 
       ${domain?`
         <div class="cs-url-row" onclick="cpUrl('${esc(domain)}')">
-          <span class="cs-url-lbl">DOMAIN</span>
+          <span class="cs-url-lbl">🌐 DOMAIN</span>
           <span class="cs-url-val">${esc(domain)}</span>
-          <span style="font-family:var(--mono);font-size:8px;color:var(--text3)">⎘</span>
+          <a href="https://${esc(domain)}" target="_blank" style="font-family:var(--mono);font-size:8px;color:var(--blue);text-decoration:none;flex-shrink:0">↗</a>
+          <button onclick="event.stopPropagation();cpUrl('${esc(domain)}')" class="cs-phone-copy">⎘</button>
         </div>`:''}
 
       <div class="cs-ppc-score">
@@ -909,6 +938,8 @@ function makeCallSpyCard(ad,i){
       <div class="cs-chips">
         ${ad.ad_delivery_stop_time?`<span class="cs-chip stopped">● STOPPED</span>`:`<span class="cs-chip active">● ACTIVE</span>`}
         ${ad._isCallCta?`<span class="cs-chip call">📞 CALL CTA</span>`:''}
+        ${dlType==='image'?`<span class="cs-chip" style="background:rgba(61,142,248,.08);border:1px solid rgba(61,142,248,.2);color:var(--blue)">🖼 IMAGE AD</span>`:''}
+        ${dlType==='video'?`<span class="cs-chip" style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);color:var(--purple)">🎬 VIDEO AD</span>`:''}
         ${spMin!=null?`<span class="cs-chip spend">💵 $${fN(spMin)}–$${fN(spMax||spMin)}</span>`:''}
         ${imMin!=null?`<span class="cs-chip imp">👁 ${fN(imMin)}–${fN(imMax||imMin)}</span>`:''}
         ${ad.ad_creation_time?`<span class="cs-chip date">📅 ${fD(ad.ad_creation_time)}</span>`:''}
@@ -917,24 +948,45 @@ function makeCallSpyCard(ad,i){
     </div>
 
     <div class="cs-footer">
-      ${creativeHtml?`<button class="cs-foot-btn" onclick="togCreative('csc_${ad.id}')">👁 PREVIEW</button>`:''}
-      <a class="cs-foot-btn" href="${esc(ad.ad_snapshot_url||'#')}" target="_blank" rel="noopener">🔗 SNAPSHOT</a>
+      <a class="cs-foot-btn" href="${esc(snapshotUrl||'#')}" target="_blank" rel="noopener">🔗 SNAPSHOT</a>
       <a class="cs-foot-btn" href="https://www.facebook.com/${ad.page_id}" target="_blank" rel="noopener">📄 PAGE</a>
-      <button class="cs-foot-btn fav ${isSaved?'saved':''} ml" onclick="toggleFbFav(this,'${ad.id}')" data-id="${ad.id}">${isSaved?'★':'☆'}</button>
+      ${imgUrl?`<a class="cs-foot-btn" href="${esc(imgUrl)}" download="creative_${adId}.jpg" target="_blank">⬇ IMG</a>`:''}
+      ${vidUrl?`<a class="cs-foot-btn" href="${esc(vidUrl)}" download="creative_${adId}.mp4" target="_blank">⬇ VID</a>`:''}
+      <button class="cs-foot-btn fav ${isSaved?'saved':''} ml" onclick="toggleFbFav(this,'${adId}')" data-id="${adId}">${isSaved?'★':'☆'}</button>
     </div>`;
 
-  // Store ad data for favorites
-  card.dataset.ad=JSON.stringify({id:ad.id,page_name:ad.page_name,ad_creative_link_titles:ad.ad_creative_link_titles,ad_creative_bodies:ad.ad_creative_bodies,ad_creative_link_captions:ad.ad_creative_link_captions,_ppcScore:ad._ppcScore,_ppcLabel:ad._ppcLabel,_vertical:ad._vertical,ad_snapshot_url:ad.ad_snapshot_url});
+  card.dataset.ad=JSON.stringify({id:ad.id,page_name:ad.page_name,ad_creative_link_titles:ad.ad_creative_link_titles,ad_creative_bodies:ad.ad_creative_bodies,ad_creative_link_captions:ad.ad_creative_link_captions,_ppcScore:ad._ppcScore,_ppcLabel:ad._ppcLabel,_vertical:ad._vertical,ad_snapshot_url:ad.ad_snapshot_url,_imgUrl:imgUrl,_vidUrl:vidUrl});
   return card;
 }
 
 function getFbCreative(ad){
+  let imgUrl='',vidUrl='',posterUrl='';
+
   const imgs=ad.ad_creative_images;
-  if(imgs?.length){const src=imgs[0].original_image_url||imgs[0].url||'';if(src)return{html:`<img src="${src}" loading="lazy" style="width:100%;max-height:220px;object-fit:cover;display:block" onerror="this.parentElement.style.display='none'">`,dlUrl:src,dlType:'image'};}
+  if(imgs?.length){
+    imgUrl=imgs[0].original_image_url||imgs[0].url||'';
+    if(imgUrl)return{
+      html:`<img src="${imgUrl}" loading="lazy" style="width:100%;max-height:240px;object-fit:cover;display:block" onerror="this.parentElement.classList.add('hidden')">`,
+      dlUrl:imgUrl,dlType:'image',imgUrl,vidUrl:'',posterUrl:''
+    };
+  }
+
   const vids=ad.ad_creative_videos;
-  if(vids?.length){const src=vids[0].video_hd_url||vids[0].video_sd_url||'';if(src)return{html:`<video src="${src}" controls playsinline preload="none" poster="${vids[0].video_preview_image_url||''}" style="width:100%;max-height:220px;object-fit:cover;display:block"></video>`,dlUrl:src,dlType:'video'};}
-  if(ad.ad_snapshot_url)return{html:`<iframe class="cs-creative-iframe" src="${ad.ad_snapshot_url}" loading="lazy" sandbox="allow-scripts allow-same-origin" style="width:100%;height:200px;border:none;background:#fff;display:block"></iframe>`,dlUrl:ad.ad_snapshot_url,dlType:'snapshot'};
-  return{html:'',dlUrl:'',dlType:''};
+  if(vids?.length){
+    vidUrl=vids[0].video_hd_url||vids[0].video_sd_url||'';
+    posterUrl=vids[0].video_preview_image_url||'';
+    if(vidUrl)return{
+      html:`<video src="${vidUrl}" controls playsinline preload="none" poster="${posterUrl}" style="width:100%;max-height:240px;object-fit:cover;display:block"></video>`,
+      dlUrl:vidUrl,dlType:'video',imgUrl:'',vidUrl,posterUrl
+    };
+  }
+
+  if(ad.ad_snapshot_url)return{
+    html:`<iframe src="${ad.ad_snapshot_url}" loading="lazy" sandbox="allow-scripts allow-same-origin" style="width:100%;height:220px;border:none;background:#fff;display:block"></iframe>`,
+    dlUrl:ad.ad_snapshot_url,dlType:'snapshot',imgUrl:'',vidUrl:'',posterUrl:''
+  };
+
+  return{html:'',dlUrl:'',dlType:'',imgUrl:'',vidUrl:'',posterUrl:''};
 }
 
 // ═══════════════════════════════════════════
