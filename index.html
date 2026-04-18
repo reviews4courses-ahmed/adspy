@@ -574,7 +574,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
                 <option value="travel">Travel/Flights</option><option value="insurance">Insurance</option><option value="finance">Finance</option><option value="home">Home Services</option><option value="legal">Legal/Medical</option><option value="all">All Verticals</option>
               </select>
             </div>
-            <button onclick="runDomainIntel()" style="background:var(--orange);border:none;color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;padding:9px 20px;border-radius:7px;cursor:pointer;letter-spacing:.05em;white-space:nowrap">ANALYZE</button>
+            <button onclick="alert('clicked - domain: '+document.getElementById('diDomain').value);runDomainIntel();" style="background:var(--orange);border:none;color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;padding:9px 20px;border-radius:7px;cursor:pointer;letter-spacing:.05em;white-space:nowrap">ANALYZE</button>
           </div>
         </div>
         <div id="diFiltersRow" style="display:none;margin-bottom:16px;gap:8px;align-items:center;flex-wrap:wrap">
@@ -1589,6 +1589,7 @@ let diAllKeywords = [];
 let diIsRunning = false;
 
 async function runDomainIntel() {
+  console.log('runDomainIntel called');
   const rawDomain = (document.getElementById('diDomain').value||'').trim();
   const domain = rawDomain.replace('https://','').replace('http://','').replace('www.','').split('/')[0].split('?')[0].trim();
   if (!domain) { showToast('Enter a domain first'); return; }
