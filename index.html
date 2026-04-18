@@ -1589,123 +1589,76 @@ let diAllKeywords = [];
 let diIsRunning = false;
 
 async function runDomainIntel() {
-  const domain = document.getElementById('diDomain').value.trim().replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+  const rawDomain = (document.getElementById('diDomain').value||'').trim();
+  const domain = rawDomain.replace(/^https?:\/\//,'').replace(/\/.*$/,'').trim();
   if (!domain) { showToast('Enter a domain first'); return; }
-  if (!GG_KEY) { openCfg(); return; }
 
-  // Always reset flag and switch to correct tab first
   diIsRunning = true;
   diAllKeywords = [];
 
-  // Make sure Google Ads tab is active and domain subtab is visible
   if (activeTab !== 'gg') switchTab('gg');
   switchGgTab('domain');
 
-  const country = document.getElementById('diCountry').value;
-  const vertical = document.getElementById('diVertical').value;
-  const probes = DI_PROBES[vertical] || DI_PROBES.all;
+  const country = (document.getElementById('diCountry')||{value:'us'}).value||'us';
+  const vertical = (document.getElementById('diVertical')||{value:'all'}).value||'all';
+  const probes = DI_PROBES[vertical]||DI_PROBES.all;
+  const apiKey = GG_KEY||'d5814f57944272d33f8c2932c0db3b8ab14a5ec7e9d2217f2bc1baec73e294f4';
 
-  // Hide previous results
-  document.getElementById('diFiltersRow').style.display = 'none';
-  document.getElementById('diStats').style.display = 'none';
-  document.getElementById('diDisclaimer').style.display = 'none';
-  document.getElementById('diTableWrap').innerHTML = '';
+  const tw=document.getElementById('diTableWrap');
+  const fr=document.getElementById('diFiltersRow');
+  const st=document.getElementById('diStats');
+  const dc=document.getElementById('diDisclaimer');
+  if(fr)fr.style.display='none';
+  if(st)st.style.display='none';
+  if(dc)dc.style.display='none';
+
+  showDiProgress(domain, 0, probes.length);
+
+  let adsFoundTotal=0, searchesRun=0;
+  const kwMap={};
 
   try {
-    // Show progress
-    showDiProgress(domain, 0, probes.length);
-
-  let adsFoundTotal = 0;
-  let searchesRun = 0;
-  const kwMap = {}; // keyword -> {score, intent, adCopy, headline, displayUrl, landingUrl, sources}
-
-  for (let i = 0; i < probes.length; i++) {
-    const probe = probes[i];
-    showDiProgress(domain, i + 1, probes.length, probe);
-
-    try {
-      const params = new URLSearchParams({
-        engine: 'google', q: probe, api_key: GG_KEY,
-        gl: country, hl: 'en', device: 'desktop', num: '10'
-      });
-      const res = await fetch(`/api/serp?${params}`);
-      const data = await res.json();
-      searchesRun++;
-
-      // Check paid ads for domain
-      const allAds = [...(data.ads||[]), ...(data.bottom_ads||[])];
-      const allResults = [...allAds, ...(data.organic_results||[])];
-
-      allResults.forEach(ad => {
-        const adDomain = xDomain(ad.displayed_link||ad.link||'');
-        const adUrl = ad.link || '';
-        if (!adDomain.includes(domain) && !adUrl.includes(domain)) return;
-
-        adsFoundTotal++;
-        const isPaid = allAds.includes(ad);
-        const adText = (ad.title||'') + ' ' + (ad.description||'');
-        const intent = detectIntent(probe);
-
-        // Score: base + paid bonus + repeat bonus
-        const baseScore = intent === 'high' ? 80 : intent === 'medium' ? 50 : 30;
-        const paidBonus = isPaid ? 20 : 0;
-
-        if (!kwMap[probe]) {
-          kwMap[probe] = {
-            keyword: probe,
-            score: baseScore + paidBonus,
-            intent,
-            isPaid,
-            adCopy: ad.description || '',
-            headline: ad.title || '',
-            displayUrl: ad.displayed_link || adDomain,
-            landingUrl: adUrl,
-            sources: 1,
-            variations: generateKwVariations(probe)
-          };
-        } else {
-          kwMap[probe].score = Math.min(100, kwMap[probe].score + 10);
-          kwMap[probe].sources++;
-          if (!kwMap[probe].adCopy && ad.description) kwMap[probe].adCopy = ad.description;
-        }
-
-        // Extract phrase variations from ad copy
-        extractPhrases(adText, domain, country).forEach(phrase => {
-          if (!kwMap[phrase]) {
-            kwMap[phrase] = {
-              keyword: phrase,
-              score: Math.max(20, baseScore - 10),
-              intent: detectIntent(phrase),
-              isPaid,
-              adCopy: ad.description || '',
-              headline: ad.title || '',
-              displayUrl: ad.displayed_link || adDomain,
-              landingUrl: adUrl,
-              sources: 1,
-              variations: generateKwVariations(phrase)
-            };
+    for(let i=0;i<probes.length;i++){
+      const probe=probes[i];
+      showDiProgress(domain, i+1, probes.length, probe);
+      try {
+        const params=new URLSearchParams({engine:'google',q:probe,api_key:apiKey,gl:country,hl:'en',device:'desktop',num:'10'});
+        const res=await fetch('/api/serp?'+params);
+        if(!res.ok)continue;
+        const data=await res.json();
+        if(data.error)continue;
+        searchesRun++;
+        const allAds=[...(data.ads||[]),...(data.bottom_ads||[])];
+        const allResults=[...allAds,...(data.organic_results||[])];
+        allResults.forEach(ad=>{
+          const adLink=ad.link||ad.displayed_link||'';
+          const adDomain=xDomain(adLink);
+          if(!adDomain.includes(domain)&&!adLink.includes(domain))return;
+          adsFoundTotal++;
+          const isPaid=allAds.includes(ad);
+          const intent=detectIntent(probe);
+          const baseScore=intent==='high'?80:intent==='medium'?50:30;
+          if(!kwMap[probe]){
+            kwMap[probe]={keyword:probe,score:baseScore+(isPaid?20:0),intent,isPaid,adCopy:ad.description||'',headline:ad.title||'',displayUrl:ad.displayed_link||adDomain,landingUrl:ad.link||'',sources:1,variations:generateKwVariations(probe)};
           } else {
-            kwMap[phrase].score = Math.min(100, kwMap[phrase].score + 5);
-            kwMap[phrase].sources++;
+            kwMap[probe].score=Math.min(100,kwMap[probe].score+10);
+            kwMap[probe].sources++;
+            if(!kwMap[probe].adCopy&&ad.description)kwMap[probe].adCopy=ad.description;
           }
+          extractPhrases((ad.title||'')+' '+(ad.description||''),domain,country).forEach(phrase=>{
+            if(!kwMap[phrase]){kwMap[phrase]={keyword:phrase,score:Math.max(20,baseScore-10),intent:detectIntent(phrase),isPaid,adCopy:ad.description||'',headline:ad.title||'',displayUrl:ad.displayed_link||adDomain,landingUrl:ad.link||'',sources:1,variations:generateKwVariations(phrase)};}
+            else{kwMap[phrase].score=Math.min(100,kwMap[phrase].score+5);kwMap[phrase].sources++;}
+          });
         });
-      });
-
-      // Small delay to avoid rate limiting
-      await new Promise(r => setTimeout(r, 300));
-
-    } catch(e) {
-      console.warn('Probe failed:', probe, e.message);
+      } catch(e2){/* skip */}
+      await new Promise(r=>setTimeout(r,200));
     }
-  }
-
-  diAllKeywords = Object.values(kwMap).sort((a,b) => b.score - a.score);
-  renderDiTable(diAllKeywords, domain, adsFoundTotal, searchesRun);
-
+    diAllKeywords=Object.values(kwMap).sort((a,b)=>b.score-a.score);
+    renderDiTable(diAllKeywords,domain,adsFoundTotal,searchesRun);
   } catch(e) {
-    document.getElementById('diTableWrap').innerHTML = `<div class="err-banner" style="margin:20px">⚠ Error: ${esc(e.message)}</div>`;
+    if(tw)tw.innerHTML=`<div class="err-banner" style="margin:20px">⚠ Error: ${esc(e.message)}</div>`;
   } finally {
-    diIsRunning = false;
+    diIsRunning=false;
   }
 }
 
