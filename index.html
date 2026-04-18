@@ -1590,7 +1590,7 @@ let diIsRunning = false;
 
 async function runDomainIntel() {
   const rawDomain = (document.getElementById('diDomain').value||'').trim();
-  const domain = rawDomain.replace(/^https?:\/\//,'').replace(/\/.*$/,'').trim();
+  const domain = rawDomain.replace('https://','').replace('http://','').replace('www.','').split('/')[0].split('?')[0].trim();
   if (!domain) { showToast('Enter a domain first'); return; }
 
   diIsRunning = true;
@@ -1692,11 +1692,13 @@ function generateKwVariations(kw) {
 
 function showDiProgress(domain, current, total, currentKw) {
   const pct = total > 0 ? Math.round((current/total)*100) : 0;
-  document.getElementById('diTableWrap').innerHTML = `
+  const tw = document.getElementById('diTableWrap');
+  if (!tw) return;
+  tw.innerHTML = `
     <div style="text-align:center;padding:40px 20px">
       <div class="spinner gg-spin" style="margin:0 auto 16px"></div>
       <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px">Analyzing ${esc(domain)}</div>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:16px">${current}/${total} searches · ${pct}% complete${currentKw ? ' · "'+esc(currentKw)+'"' : ''}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:16px">${current}/${total} searches · ${pct}% complete${currentKw?' · searching "'+esc(currentKw)+'"':''}</div>
       <div style="width:100%;max-width:300px;margin:0 auto;height:4px;background:var(--border2);border-radius:2px;overflow:hidden">
         <div style="width:${pct}%;height:100%;background:var(--orange);border-radius:2px;transition:width .3s"></div>
       </div>
