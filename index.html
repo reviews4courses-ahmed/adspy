@@ -1591,11 +1591,16 @@ let diIsRunning = false;
 async function runDomainIntel() {
   const domain = document.getElementById('diDomain').value.trim().replace(/^https?:\/\//,'').replace(/\/.*$/,'');
   if (!domain) { showToast('Enter a domain first'); return; }
-  if (diIsRunning) return;
   if (!GG_KEY) { openCfg(); return; }
 
+  // Always reset flag and switch to correct tab first
   diIsRunning = true;
   diAllKeywords = [];
+
+  // Make sure Google Ads tab is active and domain subtab is visible
+  if (activeTab !== 'gg') switchTab('gg');
+  switchGgTab('domain');
+
   const country = document.getElementById('diCountry').value;
   const vertical = document.getElementById('diVertical').value;
   const probes = DI_PROBES[vertical] || DI_PROBES.all;
@@ -1606,8 +1611,9 @@ async function runDomainIntel() {
   document.getElementById('diDisclaimer').style.display = 'none';
   document.getElementById('diTableWrap').innerHTML = '';
 
-  // Show progress
-  showDiProgress(domain, 0, probes.length);
+  try {
+    // Show progress
+    showDiProgress(domain, 0, probes.length);
 
   let adsFoundTotal = 0;
   let searchesRun = 0;
@@ -1694,9 +1700,13 @@ async function runDomainIntel() {
   }
 
   diAllKeywords = Object.values(kwMap).sort((a,b) => b.score - a.score);
-  diIsRunning = false;
-
   renderDiTable(diAllKeywords, domain, adsFoundTotal, searchesRun);
+
+  } catch(e) {
+    document.getElementById('diTableWrap').innerHTML = `<div class="err-banner" style="margin:20px">⚠ Error: ${esc(e.message)}</div>`;
+  } finally {
+    diIsRunning = false;
+  }
 }
 
 function extractPhrases(text, domain, country) {
