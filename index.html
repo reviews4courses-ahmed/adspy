@@ -541,6 +541,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
         <button class="gg-stab" onclick="switchGgTab('intel')" id="gt-intel">AD INTELLIGENCE</button>
         <button class="gg-stab" onclick="switchGgTab('keywords')" id="gt-keywords">KEYWORD EXPANSION</button>
         <button class="gg-stab" onclick="switchGgTab('geo')" id="gt-geo">GEO ANALYSIS</button>
+        <button class="gg-stab" onclick="switchGgTab('domain')" id="gt-domain">🔎 DOMAIN INTEL</button>
       </div>
       <div class="gg-content" id="gc-ads">
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;text-align:center">
@@ -552,6 +553,50 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
       <div class="gg-content hidden" id="gc-intel"><div class="empty-msg">Run a search first to see ad intelligence.</div></div>
       <div class="gg-content hidden" id="gc-keywords"><div class="empty-msg">Run a search first to see keyword expansion.</div></div>
       <div class="gg-content hidden" id="gc-geo"><div class="empty-msg">Run a search first to see geo analysis.</div></div>
+      <div class="gg-content hidden" id="gc-domain">
+        <div style="background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:20px;margin-bottom:20px">
+          <div style="font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--orange);text-transform:uppercase;margin-bottom:4px">Domain Keyword Intelligence</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:16px">Enter a competitor domain to discover their estimated paid keyword targets. Results are estimates based on observed ad data.</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+            <div style="flex:1;min-width:200px">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Competitor Domain</div>
+              <input type="text" id="diDomain" placeholder="e.g. flightbooking.com" style="width:100%;background:var(--s1);border:1px solid var(--border2);border-radius:7px;padding:9px 13px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none" onkeydown="if(event.key==='Enter')runDomainIntel()">
+            </div>
+            <div style="width:130px">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Country</div>
+              <select id="diCountry" style="width:100%;background:var(--s1);border:1px solid var(--border2);border-radius:7px;padding:9px 10px;color:var(--text);font-family:var(--mono);font-size:11px;outline:none;cursor:pointer;appearance:none">
+                <option value="us">US</option><option value="gb">UK</option><option value="ca">Canada</option><option value="au">Australia</option>
+              </select>
+            </div>
+            <div style="width:140px">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Vertical Focus</div>
+              <select id="diVertical" style="width:100%;background:var(--s1);border:1px solid var(--border2);border-radius:7px;padding:9px 10px;color:var(--text);font-family:var(--mono);font-size:11px;outline:none;cursor:pointer;appearance:none">
+                <option value="travel">Travel/Flights</option><option value="insurance">Insurance</option><option value="finance">Finance</option><option value="home">Home Services</option><option value="legal">Legal/Medical</option><option value="all">All Verticals</option>
+              </select>
+            </div>
+            <button onclick="runDomainIntel()" style="background:var(--orange);border:none;color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;padding:9px 20px;border-radius:7px;cursor:pointer;letter-spacing:.05em;white-space:nowrap">ANALYZE</button>
+          </div>
+        </div>
+        <div id="diFiltersRow" style="display:none;margin-bottom:16px;gap:8px;align-items:center;flex-wrap:wrap">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">Filter:</span>
+          <select id="diFilterIntent" onchange="filterDiTable()" style="background:var(--s2);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:10px;padding:5px 8px;border-radius:5px;outline:none;cursor:pointer;appearance:none"><option value="all">All Intent</option><option value="high">High Intent</option><option value="medium">Medium Intent</option><option value="low">Low Intent</option></select>
+          <select id="diFilterLength" onchange="filterDiTable()" style="background:var(--s2);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:10px;padding:5px 8px;border-radius:5px;outline:none;cursor:pointer;appearance:none"><option value="all">All Lengths</option><option value="short">Short (1-2 words)</option><option value="longtail">Long-tail (3+)</option></select>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <button onclick="diExportCSV()" style="font-family:var(--mono);font-size:9px;background:var(--s2);border:1px solid var(--border2);color:var(--green);padding:5px 10px;border-radius:5px;cursor:pointer">CSV</button>
+            <button onclick="diCopyClipboard()" style="font-family:var(--mono);font-size:9px;background:var(--s2);border:1px solid var(--border2);color:var(--blue);padding:5px 10px;border-radius:5px;cursor:pointer">COPY FOR GOOGLE ADS</button>
+          </div>
+        </div>
+        <div id="diStats" style="display:none;margin-bottom:14px;gap:12px;flex-wrap:wrap">
+          <div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:10px 16px;text-align:center;display:inline-block;margin-right:10px"><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--orange)" id="diStatKws">0</div><div style="font-family:var(--mono);font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Est. Keywords</div></div>
+          <div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:10px 16px;text-align:center;display:inline-block;margin-right:10px"><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green)" id="diStatHigh">0</div><div style="font-family:var(--mono);font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">High Intent</div></div>
+          <div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:10px 16px;text-align:center;display:inline-block;margin-right:10px"><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--blue)" id="diStatAds">0</div><div style="font-family:var(--mono);font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Ads Found</div></div>
+          <div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:10px 16px;text-align:center;display:inline-block"><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--yellow)" id="diStatSearches">0</div><div style="font-family:var(--mono);font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Searches Run</div></div>
+        </div>
+        <div id="diDisclaimer" style="display:none;font-family:var(--mono);font-size:9px;color:var(--text3);background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.15);border-radius:6px;padding:8px 12px;margin-bottom:14px">
+          These are <strong>Estimated Target Keywords</strong> based on observed ad data — not guaranteed exact paid keywords.
+        </div>
+        <div id="diTableWrap"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -656,7 +701,7 @@ function switchFbTab(t){
 
 function switchGgTab(t){
   activeGgTab=t;
-  ['ads','intel','keywords','geo'].forEach(x=>{
+  ['ads','intel','keywords','geo','domain'].forEach(x=>{
     document.getElementById('gt-'+x).classList.toggle('active',x===t);
     document.getElementById('gc-'+x).classList.toggle('hidden',x!==t);
   });
@@ -1526,7 +1571,283 @@ function verifyKey(){
 // ═══════════════════════════════════════════
 //  UTILS
 // ═══════════════════════════════════════════
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+// ═══════════════════════════════════════════
+//  DOMAIN KEYWORD INTELLIGENCE
+// ═══════════════════════════════════════════
+
+// Keywords to probe per vertical
+const DI_PROBES = {
+  travel: ['book flight','airline reservations','flight booking','delta airlines','cheap flights','book hotel','car rental','travel booking','airline customer service','flight support','vacation booking','travel agency call','book cruise','train ticket'],
+  insurance: ['auto insurance quote','car insurance','health insurance','life insurance','home insurance','insurance agent','Medicare plans','insurance quote','final expense insurance','homeowners insurance'],
+  finance: ['debt settlement','debt relief','personal loan','mortgage rates','refinance mortgage','tax relief','credit repair','debt consolidation','IRS tax debt','loan approval'],
+  home: ['HVAC repair','plumber near me','roofing contractor','electrician near me','pest control','lawn care service','water damage restoration','mold removal','foundation repair','solar installation','moving company','garage door repair'],
+  legal: ['personal injury lawyer','accident attorney','DUI lawyer','drug rehab center','senior care','DUI attorney','injury claim','legal help'],
+  all: ['book flight','auto insurance','debt settlement','HVAC repair','personal injury lawyer','plumber near me','mortgage rates','Medicare plans','tax relief','credit repair','book hotel','roofing contractor','electrician near me','car rental','life insurance']
+};
+
+let diAllKeywords = [];
+let diIsRunning = false;
+
+async function runDomainIntel() {
+  const domain = document.getElementById('diDomain').value.trim().replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+  if (!domain) { showToast('Enter a domain first'); return; }
+  if (diIsRunning) return;
+  if (!GG_KEY) { openCfg(); return; }
+
+  diIsRunning = true;
+  diAllKeywords = [];
+  const country = document.getElementById('diCountry').value;
+  const vertical = document.getElementById('diVertical').value;
+  const probes = DI_PROBES[vertical] || DI_PROBES.all;
+
+  // Hide previous results
+  document.getElementById('diFiltersRow').style.display = 'none';
+  document.getElementById('diStats').style.display = 'none';
+  document.getElementById('diDisclaimer').style.display = 'none';
+  document.getElementById('diTableWrap').innerHTML = '';
+
+  // Show progress
+  showDiProgress(domain, 0, probes.length);
+
+  let adsFoundTotal = 0;
+  let searchesRun = 0;
+  const kwMap = {}; // keyword -> {score, intent, adCopy, headline, displayUrl, landingUrl, sources}
+
+  for (let i = 0; i < probes.length; i++) {
+    const probe = probes[i];
+    showDiProgress(domain, i + 1, probes.length, probe);
+
+    try {
+      const params = new URLSearchParams({
+        engine: 'google', q: probe, api_key: GG_KEY,
+        gl: country, hl: 'en', device: 'desktop', num: '10'
+      });
+      const res = await fetch(`/api/serp?${params}`);
+      const data = await res.json();
+      searchesRun++;
+
+      // Check paid ads for domain
+      const allAds = [...(data.ads||[]), ...(data.bottom_ads||[])];
+      const allResults = [...allAds, ...(data.organic_results||[])];
+
+      allResults.forEach(ad => {
+        const adDomain = xDomain(ad.displayed_link||ad.link||'');
+        const adUrl = ad.link || '';
+        if (!adDomain.includes(domain) && !adUrl.includes(domain)) return;
+
+        adsFoundTotal++;
+        const isPaid = allAds.includes(ad);
+        const adText = (ad.title||'') + ' ' + (ad.description||'');
+        const intent = detectIntent(probe);
+
+        // Score: base + paid bonus + repeat bonus
+        const baseScore = intent === 'high' ? 80 : intent === 'medium' ? 50 : 30;
+        const paidBonus = isPaid ? 20 : 0;
+
+        if (!kwMap[probe]) {
+          kwMap[probe] = {
+            keyword: probe,
+            score: baseScore + paidBonus,
+            intent,
+            isPaid,
+            adCopy: ad.description || '',
+            headline: ad.title || '',
+            displayUrl: ad.displayed_link || adDomain,
+            landingUrl: adUrl,
+            sources: 1,
+            variations: generateKwVariations(probe)
+          };
+        } else {
+          kwMap[probe].score = Math.min(100, kwMap[probe].score + 10);
+          kwMap[probe].sources++;
+          if (!kwMap[probe].adCopy && ad.description) kwMap[probe].adCopy = ad.description;
+        }
+
+        // Extract phrase variations from ad copy
+        extractPhrases(adText, domain, country).forEach(phrase => {
+          if (!kwMap[phrase]) {
+            kwMap[phrase] = {
+              keyword: phrase,
+              score: Math.max(20, baseScore - 10),
+              intent: detectIntent(phrase),
+              isPaid,
+              adCopy: ad.description || '',
+              headline: ad.title || '',
+              displayUrl: ad.displayed_link || adDomain,
+              landingUrl: adUrl,
+              sources: 1,
+              variations: generateKwVariations(phrase)
+            };
+          } else {
+            kwMap[phrase].score = Math.min(100, kwMap[phrase].score + 5);
+            kwMap[phrase].sources++;
+          }
+        });
+      });
+
+      // Small delay to avoid rate limiting
+      await new Promise(r => setTimeout(r, 300));
+
+    } catch(e) {
+      console.warn('Probe failed:', probe, e.message);
+    }
+  }
+
+  diAllKeywords = Object.values(kwMap).sort((a,b) => b.score - a.score);
+  diIsRunning = false;
+
+  renderDiTable(diAllKeywords, domain, adsFoundTotal, searchesRun);
+}
+
+function extractPhrases(text, domain, country) {
+  const phrases = [];
+  const words = text.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w => w.length > 2);
+  // 2-word phrases
+  for (let i = 0; i < words.length - 1; i++) {
+    const phrase = words[i] + ' ' + words[i+1];
+    if (phrase.length > 5 && !['in the','of the','to the','and the','for the','with a'].includes(phrase)) {
+      phrases.push(phrase);
+    }
+  }
+  // 3-word phrases
+  for (let i = 0; i < words.length - 2; i++) {
+    const phrase = words[i] + ' ' + words[i+1] + ' ' + words[i+2];
+    if (phrase.length > 8) phrases.push(phrase);
+  }
+  return [...new Set(phrases)].slice(0, 5);
+}
+
+function generateKwVariations(kw) {
+  return [
+    `"${kw}"`,           // Exact match
+    `+${kw.split(' ').join(' +')}`, // Modified broad
+    kw + ' phone number',
+    kw + ' call now',
+    kw + ' near me',
+  ].slice(0, 3);
+}
+
+function showDiProgress(domain, current, total, currentKw) {
+  const pct = total > 0 ? Math.round((current/total)*100) : 0;
+  document.getElementById('diTableWrap').innerHTML = `
+    <div style="text-align:center;padding:40px 20px">
+      <div class="spinner gg-spin" style="margin:0 auto 16px"></div>
+      <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px">Analyzing ${esc(domain)}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:16px">${current}/${total} searches · ${pct}% complete${currentKw ? ' · "'+esc(currentKw)+'"' : ''}</div>
+      <div style="width:100%;max-width:300px;margin:0 auto;height:4px;background:var(--border2);border-radius:2px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:var(--orange);border-radius:2px;transition:width .3s"></div>
+      </div>
+    </div>`;
+}
+
+function renderDiTable(keywords, domain, adsFound, searches) {
+  if (!keywords.length) {
+    document.getElementById('diTableWrap').innerHTML = `<div class="empty-msg" style="margin-top:40px">No ads found for domain "${esc(domain)}".<br>Try a different vertical or check the domain spelling.</div>`;
+    return;
+  }
+
+  // Show UI elements
+  document.getElementById('diFiltersRow').style.display = 'flex';
+  document.getElementById('diStats').style.display = 'block';
+  document.getElementById('diDisclaimer').style.display = 'block';
+  document.getElementById('diStatKws').textContent = keywords.length;
+  document.getElementById('diStatHigh').textContent = keywords.filter(k=>k.intent==='high').length;
+  document.getElementById('diStatAds').textContent = adsFound;
+  document.getElementById('diStatSearches').textContent = searches;
+
+  renderDiTableFiltered(keywords);
+}
+
+function filterDiTable() {
+  const intentF = document.getElementById('diFilterIntent').value;
+  const lengthF = document.getElementById('diFilterLength').value;
+  let filtered = [...diAllKeywords];
+  if (intentF !== 'all') filtered = filtered.filter(k => k.intent === intentF);
+  if (lengthF === 'short') filtered = filtered.filter(k => k.keyword.split(' ').length <= 2);
+  if (lengthF === 'longtail') filtered = filtered.filter(k => k.keyword.split(' ').length >= 3);
+  renderDiTableFiltered(filtered);
+}
+
+function renderDiTableFiltered(keywords) {
+  const intentColors = { high: 'var(--green)', medium: 'var(--yellow)', low: 'var(--text3)' };
+  const intentBg = { high: 'var(--gdim)', medium: 'var(--ydim)', low: 'rgba(90,112,128,.1)' };
+
+  const rows = keywords.map((k, i) => `
+    <tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background='transparent'">
+      <td style="padding:10px 12px;font-family:var(--mono);font-size:11px;color:var(--text);font-weight:500">${esc(k.keyword)}</td>
+      <td style="padding:10px 12px;text-align:center">
+        <span style="font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 8px;border-radius:3px;background:${intentBg[k.intent]};color:${intentColors[k.intent]};border:1px solid ${intentColors[k.intent]}33;text-transform:uppercase">${k.intent}</span>
+      </td>
+      <td style="padding:10px 12px;text-align:center">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden"><div style="width:${k.score}%;height:100%;background:${k.score>=70?'var(--green)':k.score>=40?'var(--yellow)':'var(--text3)'};border-radius:2px"></div></div>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--text3);flex-shrink:0">${k.score}</span>
+        </div>
+      </td>
+      <td style="padding:10px 12px">
+        <span style="font-family:var(--mono);font-size:8px;background:${k.isPaid?'var(--odim)':'var(--bdim)'};color:${k.isPaid?'var(--orange)':'var(--blue)'};padding:2px 6px;border-radius:3px;border:1px solid ${k.isPaid?'rgba(255,107,53,.2)':'rgba(61,142,248,.2)'}">${k.isPaid?'PAID':'ORGANIC'}</span>
+      </td>
+      <td style="padding:10px 12px;font-size:10px;color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(k.adCopy)}">${esc(k.adCopy||k.headline||'—')}</td>
+      <td style="padding:10px 12px">
+        ${k.landingUrl ? `<a href="${esc(k.landingUrl)}" target="_blank" style="font-family:var(--mono);font-size:9px;color:var(--blue);text-decoration:none;white-space:nowrap" title="${esc(k.landingUrl)}">${esc(xDomain(k.landingUrl))||'↗'}</a>` : '<span style="color:var(--text3);font-size:9px">—</span>'}
+      </td>
+      <td style="padding:10px 12px">
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${k.variations.map(v=>`<span style="font-family:var(--mono);font-size:8px;background:var(--s1);border:1px solid var(--border2);color:var(--text3);padding:2px 6px;border-radius:3px;cursor:pointer" onclick="document.getElementById('searchInput').value='${esc(v.replace(/['"]/g,''))}';switchTab('gg');fetchGg('${esc(v.replace(/['"]/g,''))}','${esc(v.replace(/['"]/g,''))}')" title="Search this">${esc(v)}</span>`).join('')}
+        </div>
+      </td>
+      <td style="padding:10px 12px;text-align:center">
+        <button onclick="cpUrl('${esc(k.keyword)}')" style="font-family:var(--mono);font-size:8px;background:transparent;border:1px solid var(--border2);color:var(--text3);padding:3px 7px;border-radius:4px;cursor:pointer">⎘</button>
+      </td>
+    </tr>`).join('');
+
+  document.getElementById('diTableWrap').innerHTML = `
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px">Showing ${keywords.length} estimated target keywords for <strong style="color:var(--orange)">${esc(document.getElementById('diDomain').value)}</strong></div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border2)">
+            <th style="padding:8px 12px;text-align:left;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);font-weight:700">Keyword</th>
+            <th style="padding:8px 12px;text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);font-weight:700">Intent</th>
+            <th style="padding:8px 12px;text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);font-weight:700;min-width:100px">Score</th>
+            <th style="padding:8px 12px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);font-weight:700">Type</th>
+            <th style="padding:8px 12px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);font-weight:700">Sample Ad Copy</th>
+            <th style="padding:8px 12px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);font-weight:700">Landing Page</th>
+            <th style="padding:8px 12px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);font-weight:700">Match Types</th>
+            <th style="padding:8px 12px;font-family:var(--mono);font-size:9px;color:var(--text3);font-weight:700">⎘</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function diExportCSV() {
+  if (!diAllKeywords.length) { showToast('No data to export'); return; }
+  const headers = ['Keyword','Intent','Score','Type','Sample Ad Copy','Landing Page URL','Match Type 1','Match Type 2','Match Type 3'];
+  const rows = diAllKeywords.map(k => [
+    k.keyword, k.intent, k.score, k.isPaid?'PAID':'ORGANIC',
+    (k.adCopy||'').replace(/"/g,"'"),
+    k.landingUrl||'',
+    k.variations[0]||'', k.variations[1]||'', k.variations[2]||''
+  ]);
+  const csv = [headers,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `domain_intel_${document.getElementById('diDomain').value}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exported!');
+}
+
+function diCopyClipboard() {
+  if (!diAllKeywords.length) { showToast('No data to copy'); return; }
+  // Format for Google Ads upload — one keyword per line with match types
+  const lines = diAllKeywords.flatMap(k => k.variations);
+  navigator.clipboard.writeText(lines.join('\n')).then(() => showToast(`✓ ${lines.length} keywords copied for Google Ads!`));
+}
 function fD(s){return new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
 function fN(n){const x=parseInt(n||0);if(x>=1000000)return(x/1000000).toFixed(1)+'M';if(x>=1000)return(x/1000).toFixed(0)+'K';return x.toString();}
 function xDomain(url){try{return new URL(url.startsWith('http')?url:'https://'+url).hostname.replace('www.','');}catch{return url.split('/')[0].replace('www.','');}}
